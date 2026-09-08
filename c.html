@@ -1,0 +1,1449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Yavapai Waste Solutions, Direction C</title>
+</head>
+<body>
+
+<!-- Direction C, app-like build. Headless by design: no doctype/html/head/body wrappers.
+  The Get a Bin flow (mockups/components/get-a-bin.html) is the hero; the 3D dumpster is its size visualizer. -->
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* ============================================================
+ HEAVY METAL  |  Yavapai Waste Solutions
+ Single committed dark theme. Solid borders only. Transform and
+ opacity are the animated properties, with one sanctioned exception:
+ the booking box glides to the active step's measured height. Color changes snap.
+ ============================================================ */
+:root{
+ color-scheme:dark;
+ --bg:#17181a;--panel:#2a2d31;--panel-2:#212327;--steel:#9ba0a6;--ink:#f2f1ee;
+ --yl:#ffd100;--yl-hi:#ffdb33;--yl-lo:#e6bc00;--yl-ink:#151306;
+ --hair:#3a3e44;--hair-hi:#4a4e55;--well:#101113;--well-2:#0c0d0e;--steel-dim:#8b9198;--etch:#c9cdd2;--etch-dim:#a9aeb5;
+ --disp:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+ --mono:"JetBrains Mono","Cascadia Mono",Consolas,monospace;
+ --body:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+ --wrap:1240px;
+ --s1:8px;--s2:16px;--s3:24px;--s4:32px;--s5:48px;--s6:64px;
+ --t-micro:10px;--t-label:11px;--t-ui:12px;--t-btn:13px;--t-body-s:14px;--t-body:15px;--t-lead:17px;
+ --ls-tight:.04em;--ls-ui:.08em;--ls-label:.12em;--ls-wide:.16em;
+ --tap:44px;--ring:2px;
+ --plate:linear-gradient(175deg,#41454b 0%,#2c2f34 38%,#24262a 62%,#33363b 100%);
+}
+/* phones: the explaining layer (labels, hints, chips) steps up so it reads without glasses */
+@media (max-width:600px){:root{--t-micro:12px;--t-label:13px;--t-ui:14px}}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+[hidden]{display:none !important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:var(--t-body);line-height:1.5;overflow-x:clip;-webkit-font-smoothing:antialiased;padding-bottom:72px}
+::selection{background:var(--yl);color:var(--yl-ink)}
+h1,h2,h3{font-family:var(--disp);text-transform:uppercase;line-height:.92;margin:0;font-weight:800;letter-spacing:.005em;text-wrap:balance}
+p{margin:0}
+a{color:var(--yl)}
+svg{max-width:100%;display:block}
+button{font:inherit}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0}
+:focus-visible{outline:var(--ring) solid var(--yl);outline-offset:2px;border-radius:2px}
+main:focus{outline:0}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:fixed;left:12px;top:12px;z-index:200;transform:translateY(-300%);background:var(--yl);color:var(--yl-ink);font-family:var(--mono);font-weight:700;font-size:var(--t-ui);letter-spacing:var(--ls-label);text-transform:uppercase;text-decoration:none;padding:12px 18px;border-radius:2px}
+.skip:focus-visible{transform:none}
+.wrap{max-width:var(--wrap);margin:0 auto;padding-inline:var(--s3)}
+.mono{font-family:var(--mono)}
+.tab{font-variant-numeric:tabular-nums}
+
+.sec{padding:var(--s5) 0;border-top:1px solid var(--hair)}
+.sechead{display:flex;flex-direction:column;gap:12px;margin-bottom:var(--s3)}
+.sechead h2{font-size:clamp(36px,5.2vw,60px)}
+.sechead .sub{color:var(--steel);font-size:var(--t-lead);max-width:52ch}
+
+/* rivets + plates + brackets */
+.rivets{position:relative}
+.rivets::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+ radial-gradient(circle 3px at 11px 11px,var(--hair-hi) 0 1.4px,var(--well) 1.9px,transparent 3px),
+ radial-gradient(circle 3px at calc(100% - 11px) 11px,var(--hair-hi) 0 1.4px,var(--well) 1.9px,transparent 3px),
+ radial-gradient(circle 3px at 11px calc(100% - 11px),var(--hair-hi) 0 1.4px,var(--well) 1.9px,transparent 3px),
+ radial-gradient(circle 3px at calc(100% - 11px) calc(100% - 11px),var(--hair-hi) 0 1.4px,var(--well) 1.9px,transparent 3px);background-repeat:no-repeat}
+.brkt::before,.brkt::after,.brkt .ck::before,.brkt .ck::after{content:"";position:absolute;width:22px;height:22px;border:0 solid var(--yl);pointer-events:none;z-index:2}
+.brkt::before{top:4px;left:4px;border-top-width:3px;border-left-width:3px}
+.brkt::after{top:4px;right:4px;border-top-width:3px;border-right-width:3px}
+.brkt .ck::before{bottom:4px;left:4px;border-bottom-width:3px;border-left-width:3px}
+.brkt .ck::after{bottom:4px;right:4px;border-bottom-width:3px;border-right-width:3px}
+.dplate{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.045) 0 2px,transparent 2px 14px),repeating-linear-gradient(-45deg,rgba(0,0,0,.20) 0 2px,transparent 2px 14px)}
+
+/* buttons: yellow fill or yellow ring, mono uppercase, 2px radius */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 var(--s3);border:0;border-radius:2px;font-family:var(--mono);font-weight:700;font-size:var(--t-btn);letter-spacing:var(--ls-label);text-transform:uppercase;background:var(--yl);color:var(--yl-ink);text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--yl-hi)}
+.btn:active{background:var(--yl-lo)}
+.btn.line{background:transparent;color:var(--yl);box-shadow:inset 0 0 0 1px var(--yl)}
+.btn.line:hover{background:rgba(255,209,0,.08)}
+.btn.sm{min-height:44px;padding:0 var(--s2);font-size:var(--t-ui)}
+.btn[disabled]{opacity:.6;cursor:default}
+.btn:focus-visible{outline-offset:3px}
+
+/* ============================================================ NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(23,24,26,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--hair)}
+.nav-in{--nav-pad:var(--s3);position:relative;display:flex;align-items:center;gap:var(--s3);height:64px;padding-inline:var(--nav-pad)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand svg{width:34px;height:26px}
+.brand .wm{font-family:var(--disp);font-weight:800;font-size:28px;letter-spacing:var(--ls-tight);line-height:1}
+.brand .tag{font-family:var(--mono);font-size:var(--t-micro);letter-spacing:var(--ls-wide);color:var(--steel);text-transform:uppercase;display:block;margin-top:1px}
+.nav-links{display:flex;align-items:center;gap:var(--s3)}
+.nav-links > a:not(.btn){font-family:var(--mono);font-size:var(--t-ui);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--ink);text-decoration:none;padding:12px 2px;position:relative;min-height:var(--tap);display:inline-flex;align-items:center}
+.nav-links > a:not(.btn)::after{content:"";position:absolute;left:0;right:0;bottom:6px;height:2px;background:var(--yl);transform:scaleX(0);transform-origin:left}
+.nav-links > a:not(.btn):hover::after,.nav-links > a:not(.btn):focus-visible::after{transform:scaleX(1)}
+.nav-links > a.nav-phone{color:var(--yl);font-weight:700;justify-content:center;padding:12px 8px}
+.nav-menu{display:none;position:relative}
+.nav-menu summary{list-style:none;cursor:pointer;user-select:none;-webkit-user-select:none;display:inline-flex;align-items:center;min-height:var(--tap);padding:0 14px;font-family:var(--mono);font-weight:700;font-size:var(--t-ui);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--ink);border:1px solid var(--hair);border-radius:2px}
+.nav-menu summary::-webkit-details-marker{display:none}
+.nav-menu[open] summary{border-color:var(--yl);color:var(--yl)}
+.nav-drop{position:absolute;right:0;top:calc(100% + 9px);z-index:100;display:flex;flex-direction:column;min-width:220px;background:var(--panel);border:1px solid var(--hair)}
+.nav-drop a{font-family:var(--mono);font-size:var(--t-ui);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--ink);text-decoration:none;padding:14px 16px;border-bottom:1px solid var(--hair);min-height:var(--tap)}
+.nav-drop a:last-child{border-bottom:0}
+.nav-drop a:hover{color:var(--yl)}
+.ph-s{display:none}
+@media (max-width:920px){
+ .nav-links > a:not(.nav-phone):not(.btn){display:none}
+ .nav-links{gap:12px}.brand .tag{display:none}.nav-menu{display:block}
+}
+@media (max-width:600px){
+ .ph-l{display:none}.ph-s{display:inline}
+ .nav-in{--nav-pad:var(--s2);gap:12px}.nav-links{gap:var(--s1)}
+ .nav-links .btn.sm{padding:0 12px}.nav-menu summary{padding:0 12px}.brand svg{width:28px;height:22px}
+ .nav-links .btn.sm,.nav-menu summary{font-size:13px;letter-spacing:var(--ls-ui)}
+}
+/* 320px class phones: the flow is one swipe down and the mini bar carries Get a Bin, so the nav keeps Call and Menu */
+@media (max-width:359px){.nav-links .btn.sm{display:none}}
+
+/* ============================================================ HERO */
+.hero{position:relative;overflow-x:clip;border-bottom:1px solid var(--hair)}
+.hero-bggrid{position:absolute;inset:0;pointer-events:none;background:
+ linear-gradient(var(--hair) 1px,transparent 1px) 0 0/100% 120px,
+ linear-gradient(90deg,var(--hair) 1px,transparent 1px) 0 0/120px 100%;
+ mask-image:linear-gradient(#000 55%,transparent);-webkit-mask-image:linear-gradient(#000 55%,transparent);opacity:.18}
+.hero-in{position:relative;display:grid;grid-template-columns:minmax(0,660px) minmax(380px,1fr);gap:var(--s4);align-items:start;padding-top:var(--s2);padding-bottom:var(--s4)}
+@media (max-width:600px){.hero-in{padding-top:12px}}
+.hero-copy{display:flex;flex-direction:column;gap:12px;min-width:0}
+/* one line inside the 660px column so the first question sits above the fold */
+.hero-title{font-size:clamp(48px,6vw,80px)}
+.hero-title .yl{color:var(--yl)}
+.hero-title .line-mask{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.06em}
+.hero-title .line{display:inline-block}
+.hero-sub{font-family:var(--mono);font-size:var(--t-body-s);letter-spacing:var(--ls-ui);color:var(--steel);max-width:44ch}
+.hero-sub b{color:var(--ink);font-weight:500}
+
+/* --- 3D stage: the size visualizer (1000px and up) --- */
+.hero-stagewrap{position:relative;display:flex;flex-direction:column;gap:var(--s2);align-self:center;min-width:0}
+/* overflow:clip is the backstop: the model can never paint over the form column */
+.hero-viz{position:relative;height:440px;overflow:clip}
+.hero-floor{position:absolute;left:-10%;right:-10%;bottom:48px;height:110px;background:
+ repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 16px),
+ repeating-linear-gradient(-45deg,rgba(0,0,0,.28) 0 2px,transparent 2px 16px),
+ linear-gradient(var(--panel-2),var(--bg));border-top:1px solid var(--hair);transform:perspective(700px) rotateX(58deg);transform-origin:top}
+.scale-anchor{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%) scale(var(--u,.86))}
+.stage{perspective:1200px;width:460px;height:300px}
+.tilt,.dragyaw,.box{transform-style:preserve-3d}
+.tilt{width:100%;height:100%;transform:rotateX(-8deg)}
+.dragyaw{width:100%;height:100%;transform:rotateY(-22deg)}
+.box{position:relative;width:460px;height:230px;margin:35px auto 0;transform-origin:50% 100%}
+.face{position:absolute;top:0;left:0;backface-visibility:hidden}
+.face svg{width:100%;height:100%}
+.face--front{width:460px;height:230px;transform:translateZ(100px)}
+.face--back{width:460px;height:230px;transform:rotateY(180deg) translateZ(100px)}
+.face--left{width:200px;height:230px;left:130px;transform:rotateY(-90deg) translateZ(230px)}
+.face--right{width:200px;height:230px;left:130px;transform:rotateY(90deg) translateZ(230px)}
+.face--lid{width:460px;height:200px;top:15px;transform-origin:50% 0;transform:translateZ(-100px) rotateX(var(--lid,90deg));backface-visibility:visible}
+.face--bottom{width:460px;height:200px;top:15px;transform-origin:50% 50%;transform:rotateX(90deg) translateZ(-115px);background:var(--well);backface-visibility:visible}
+.box-shadow{position:absolute;left:50%;bottom:2px;width:440px;height:46px;transform:translateX(-50%);z-index:-1;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.55),transparent 70%);pointer-events:none}
+.rig-person{position:absolute;left:8%;bottom:52px;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.rig-person svg{height:104px;width:auto}
+.rig-person .cap{font-family:var(--mono);font-size:var(--t-micro);letter-spacing:var(--ls-label);color:var(--steel);text-transform:uppercase}
+/* the stage shrinks with its column (380px floor) so the model stays inside it at every desktop width */
+@media (max-width:1179px){.scale-anchor{--u:.68}.hero-viz{height:380px}}
+@media (max-width:1099px){.scale-anchor{--u:.58}.hero-viz{height:340px}}
+@media (max-width:999px){
+ .hero-in{grid-template-columns:1fr}
+ .hero-stagewrap{display:none}
+}
+
+/* ============================================================ GET A BIN FLOW (reference component, reskinned) */
+.flow-wrap{position:relative}
+.flow{position:relative;display:flex;flex-direction:column;gap:var(--s2);overflow:clip;padding:var(--s3);border:1px solid var(--hair-hi);border-radius:2px;background:var(--panel-2)}
+@media (max-width:480px){.flow{padding:var(--s2)}}
+.flow-head{display:flex;flex-direction:column;gap:12px}
+.rail-row{display:flex;align-items:center;gap:12px}
+.rail{display:flex;gap:4px;flex:1}
+.seg{position:relative;flex:1;height:6px;border-radius:1px;background:var(--hair);overflow:hidden}
+.fill{position:absolute;inset:0;background:var(--steel);transform-origin:0 50%}
+.seg.is-current .fill{background:var(--yl)}
+.counter{font-family:var(--mono);font-size:var(--t-label);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--steel);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chips{position:relative;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;min-height:calc(var(--tap) + 12px);padding:6px;margin:-6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips-empty{margin:0;font-family:var(--mono);font-size:var(--t-ui);letter-spacing:var(--ls-ui);color:var(--steel);text-transform:uppercase}
+.chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:var(--tap);padding:0 14px;border:1px solid var(--hair-hi);border-radius:2px;background:var(--panel);color:var(--ink);font-family:var(--mono);font-size:var(--t-ui);font-weight:700;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;cursor:pointer}
+.chip svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.chip.is-current{background:var(--yl);border-color:var(--yl);color:var(--yl-ink)}
+.chip[disabled]{cursor:default;opacity:.6}
+.estimate{margin:0;display:flex;flex-direction:column;gap:2px;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.estimate .line{font-size:var(--t-ui);letter-spacing:.05em;text-transform:uppercase;color:var(--steel)}
+.estimate .line b{font-size:22px;font-weight:700;color:var(--yl);letter-spacing:0}
+.estimate small{font-size:var(--t-micro);letter-spacing:var(--ls-label);color:var(--steel);text-transform:uppercase}
+.step{display:flex;flex-direction:column;gap:var(--s2)}
+.step + .step{margin-top:12px;padding-top:var(--s3);border-top:1px solid var(--hair)}
+/* With JS the steps share one grid cell and the box clips to the active step's measured height; the script glides that height between steps (the one layout property this page animates). The estimate sits in the row above, so the same glide carries it in. The clip is vertical only, and 8px of padding inside it keeps focus rings and the selection pop off the edge. During a slide the outgoing step leaves the grid flow (.is-out), pinned by the script at the offset it already had, so the estimate row appearing or collapsing above cannot shove it; the incoming step stays in row 2 and is in its final place from the first frame. */
+.js .steps{position:relative;display:grid;grid-template-columns:minmax(0,1fr);align-content:start;box-sizing:content-box;padding:8px;margin:-8px;overflow:hidden;overflow:visible clip}
+.js .step{grid-row:2;grid-column:1;align-self:start;margin-top:0;padding-top:0;border-top:0}
+.js .step.is-out{position:absolute;grid-area:auto;top:8px;left:8px;right:8px}
+.js .step:not([data-step="1"]){visibility:hidden}
+.js .seg:not(.is-current) .fill{transform:scaleX(0)}
+.step-top{display:flex;align-items:center;gap:12px;min-height:var(--tap)}
+.back{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:var(--tap);min-height:var(--tap);padding:0 12px 0 8px;border:1px solid var(--hair-hi);border-radius:2px;background:transparent;color:var(--yl);font-family:var(--mono);font-size:var(--t-label);font-weight:700;letter-spacing:var(--ls-label);text-transform:uppercase;cursor:pointer}
+.back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.q{margin:0;font-size:clamp(28px,3vw,38px);font-weight:800;line-height:1;text-wrap:balance}
+.q:focus{outline:none}
+.q:focus-visible{outline:var(--ring) solid var(--yl);outline-offset:4px}
+.tile input,.pill input{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.label{display:block;margin-bottom:8px;font-family:var(--mono);font-size:var(--t-micro);font-weight:700;letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--steel)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:360px){.tiles{grid-template-columns:1fr}}
+.tile{position:relative;min-width:0}
+/* gunmetal plate, four yellow rivet dots; the checked plate lights yellow and the rivets go dark */
+.tile label{--rv:var(--yl);position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-height:88px;padding:14px 16px;border:1px solid var(--hair-hi);border-radius:2px;background:var(--plate);color:var(--ink);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.tile label::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+ radial-gradient(circle 2px at 7px 7px,var(--rv) 0 1.4px,transparent 2px),
+ radial-gradient(circle 2px at calc(100% - 7px) 7px,var(--rv) 0 1.4px,transparent 2px),
+ radial-gradient(circle 2px at 7px calc(100% - 7px),var(--rv) 0 1.4px,transparent 2px),
+ radial-gradient(circle 2px at calc(100% - 7px) calc(100% - 7px),var(--rv) 0 1.4px,transparent 2px);background-repeat:no-repeat}
+.tile label b{display:block;font-family:var(--disp);font-weight:700;font-size:22px;text-transform:uppercase;line-height:1;letter-spacing:.01em}
+.tile label small{display:block;margin-top:5px;font-family:var(--mono);font-size:var(--t-label);letter-spacing:.05em;line-height:1.3;color:var(--etch)}
+/* phones: tighter plate and a 19px title so Home cleanout and Business pickup set on one line in a 141px tile */
+@media (max-width:480px){.tile label{padding:12px 14px}.tile label b{font-size:19px}}
+.tile svg{width:26px;height:26px;stroke:var(--yl);fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.tile input:checked + label{--rv:var(--yl-ink);background:var(--yl);border-color:var(--yl);color:var(--yl-ink)}
+.tile input:checked + label small{color:var(--yl-ink);opacity:.75}
+.tile input:checked + label svg{stroke:var(--yl-ink)}
+.tile input:focus-visible + label,.pill input:focus-visible + label{outline:var(--ring) solid var(--yl);outline-offset:3px}
+.tiles.compact{gap:8px}
+@media (min-width:640px){.tiles.compact{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+.tiles.compact label{min-height:60px;justify-content:center;gap:0;padding:10px 14px}
+.tiles.compact label b{font-size:20px}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{position:relative}
+.pill label{display:inline-flex;align-items:center;justify-content:center;min-height:var(--tap);padding:0 14px;border:0;box-shadow:inset 0 0 0 1px var(--yl);border-radius:2px;background:transparent;color:var(--yl);font-family:var(--mono);font-size:var(--t-ui);font-weight:700;letter-spacing:var(--ls-ui);text-transform:uppercase;white-space:nowrap;cursor:pointer}
+.pill label:hover{background:rgba(255,209,0,.08)}
+.pill input:checked + label{background:var(--yl);color:var(--yl-ink)}
+@media (hover:hover){.tile label:hover{border-color:var(--yl)}.chip:hover,.back:hover{border-color:var(--yl)}}
+/* size scene: side view with person and pickup; the SVG retires on desktop where the 3D rig carries the picture */
+.scene{margin:0;display:flex;flex-direction:column;gap:10px}
+.scene svg{display:block;width:100%;height:auto;color:var(--steel)}
+.scene .p{fill:var(--panel-2)}
+.scene .ground{stroke:var(--hair-hi);stroke-width:1.5}
+.scene .tag{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.06em;fill:var(--steel)}
+@media (max-width:480px){.scene .tag{font-size:22px}}
+@media (min-width:1000px){.js .scene svg{display:none}}
+.spec{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px var(--s2);font-family:var(--mono);font-variant-numeric:tabular-nums}
+.spec .yd{font-family:var(--disp);font-size:30px;font-weight:800;text-transform:uppercase;line-height:1;color:var(--yl)}
+.spec .dims{font-size:var(--t-ui);letter-spacing:var(--ls-ui);color:var(--steel)}
+.spec .fits{font-size:var(--t-ui);letter-spacing:var(--ls-ui);font-weight:700;margin-left:auto;text-transform:uppercase}
+.sizes{display:flex;flex-direction:column;gap:12px}
+.when{display:block}
+@media (min-width:640px){.when{max-width:240px}}
+.when .label,.field .label{margin-bottom:4px}
+/* 16px floor: anything smaller makes iOS Safari zoom the page on focus */
+.input{display:block;width:100%;min-height:48px;padding:0 14px;border:1px solid var(--hair-hi);border-radius:2px;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:16px}
+.input:hover{border-color:var(--yl)}
+.input:focus-visible{outline:var(--ring) solid var(--yl);outline-offset:0;border-color:var(--yl)}
+.input[aria-invalid="true"]{border-color:var(--yl)}
+.hint{margin:0;min-height:1.4rem;font-family:var(--mono);font-size:var(--t-ui);letter-spacing:.05em;color:var(--yl)}
+.hint a{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.fields{display:flex;flex-direction:column;gap:12px}
+.actions{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:4px;min-height:48px}
+.actions.who{flex-direction:row-reverse;justify-content:space-between;flex-wrap:wrap}
+.alt{margin:0;font-family:var(--mono);font-size:var(--t-ui);letter-spacing:var(--ls-ui);color:var(--steel)}
+.alt a{display:inline-flex;align-items:center;min-height:var(--tap);color:var(--yl);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.btn[data-submit]{min-width:14ch}
+@media (max-width:480px){.actions .btn{width:100%}.actions.who{flex-direction:column;align-items:stretch}.alt{text-align:center}}
+.done{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:var(--s3);border:1px solid var(--yl);border-radius:2px;background:rgba(255,209,0,.06)}
+.done:focus{outline:none}
+.done:focus-visible{outline:var(--ring) solid var(--yl);outline-offset:3px}
+.done p{margin:0}
+.done-msg{font-size:var(--t-lead)}
+.done-recap{font-family:var(--mono);font-size:var(--t-ui);letter-spacing:var(--ls-ui);color:var(--steel)}
+.rail-row,.back,[data-next-row],.estimate{display:none}
+.js .rail-row{display:flex}.js .back{display:inline-flex}.js [data-next-row]{display:flex}.js .estimate{display:flex;grid-row:1;grid-column:1;padding-bottom:12px}
+
+/* ============================================================ SERVICES (compact tiles, expand on hover or tap) */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+.svc{position:relative;display:flex;flex-direction:column;background:var(--plate);border:1px solid var(--hair-hi);border-radius:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);min-height:188px}
+.svc-head{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:14px var(--s2);border:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer;border-radius:2px}
+.svc-head svg{width:44px;height:36px;flex:0 0 auto}
+.svc-h{font-size:26px;font-weight:700;line-height:1}
+.svc-head .ttl{flex:1;display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--etch)}
+.svc-head .ttl::after{content:"+";display:inline-block;font-family:var(--mono);font-weight:700;font-size:18px;line-height:1;color:var(--yl)}
+.svc.is-open .svc-head .ttl{color:var(--yl)}
+.svc.is-open .svc-head .ttl::after{transform:rotate(45deg)}
+/* the reveal lives in reserved space: no layout shift, only opacity and transform move. Hidden only once JS is running; without it every card is open. */
+.svc-more{display:flex;flex-direction:column;gap:12px;padding:0 var(--s2) var(--s2)}
+.js .svc-more{opacity:0;transform:translateY(8px);visibility:hidden}
+.svc-more p{font-family:var(--mono);font-size:var(--t-ui);letter-spacing:var(--ls-ui);color:var(--etch-dim)}
+.svc.is-open .svc-more{opacity:1;transform:none;visibility:visible}
+@media (hover:hover){.svc:hover .svc-more{opacity:1;transform:none;visibility:visible}.svc:hover .svc-head .ttl{color:var(--yl)}}
+/* touch layouts skip the reveal: every card is open, one tap on Start here goes straight into the flow */
+@media (max-width:900px){.svc-grid{grid-template-columns:1fr}.svc{min-height:0}.svc-more,.js .svc-more{padding-top:0;opacity:1;transform:none;visibility:visible}.svc-head .ttl::after{content:none}}
+
+/* ============================================================ TRUST STRIP */
+.plates{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+.plate{position:relative;background:var(--plate);border:1px solid var(--hair-hi);border-radius:2px;padding:var(--s2) var(--s3);display:flex;align-items:center;gap:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.10);min-height:72px}
+.plate > svg{width:36px;height:32px;flex:0 0 auto}
+.plate .etch{font-family:var(--disp);font-weight:700;text-transform:uppercase;font-size:24px;letter-spacing:var(--ls-tight);line-height:1;color:var(--etch)}
+.plate .etch-sub{font-family:var(--mono);font-size:var(--t-micro);letter-spacing:var(--ls-wide);text-transform:uppercase;color:var(--etch-dim);display:block;margin-top:4px}
+@media (max-width:800px){.plates{grid-template-columns:1fr}}
+
+/* ============================================================ ONE ROTATING QUOTE */
+.quote{display:grid;grid-template-columns:1fr auto;gap:var(--s3);align-items:center;border:1px solid var(--hair);background:var(--panel-2);padding:var(--s3) var(--s4);position:relative;min-height:150px}
+/* the box reserves the tallest quote so a rotation never shifts the page below it */
+.quote blockquote{margin:0;min-height:calc(3 * 1.4em);font-size:clamp(18px,2vw,24px);line-height:1.4;color:var(--ink);text-wrap:balance}
+@media (min-width:600px){.quote blockquote{min-height:calc(2 * 1.4em)}}
+.quote .cite{display:block;margin-top:10px;font-family:var(--mono);font-size:var(--t-label);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--steel)}
+.quote .cite b{color:var(--yl);font-weight:700}
+.quote-ctl{display:flex;gap:8px}
+.quote-ctl button{width:var(--tap);height:var(--tap);border:0;box-shadow:inset 0 0 0 1px var(--yl);background:transparent;color:var(--yl);border-radius:2px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.quote-ctl button:hover{background:rgba(255,209,0,.08)}
+.quote-ctl svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:600px){.quote{grid-template-columns:1fr}}
+
+/* ============================================================ SERVICE AREA (map + chips) */
+.area-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:var(--s3);align-items:stretch}
+.area-map{background:var(--panel-2);border:1px solid var(--hair);position:relative;display:flex;padding:8px}
+.area-map svg{width:100%;height:auto}
+.tn{cursor:pointer;transform-box:fill-box;transform-origin:center}
+.tn circle{fill:#585d64}
+.tn text{font-family:var(--mono);font-size:10px;fill:var(--steel);letter-spacing:2px}
+.tn[data-town="prescott"] text{fill:var(--yl)}
+.tn.is-hi circle,.tn:hover circle,.tn:focus-visible circle{fill:var(--yl)}
+.tn.is-hi text,.tn:hover text,.tn:focus-visible text{fill:var(--yl)}
+.tn:focus-visible{outline:0}
+.tn:focus-visible circle{stroke:var(--ink);stroke-width:2}
+.tn.is-hi,.tn:hover{transform:scale(1.12)}
+.area-side{display:flex;flex-direction:column;gap:var(--s2);justify-content:center}
+.tchips{display:flex;flex-wrap:wrap;gap:8px}
+.tchip{display:inline-flex;align-items:center;min-height:var(--tap);padding:0 14px;border:1px solid var(--hair-hi);border-radius:2px;background:var(--panel);color:var(--ink);font-family:var(--mono);font-size:var(--t-ui);font-weight:700;letter-spacing:var(--ls-ui);text-transform:uppercase;cursor:pointer}
+.tchip:hover,.tchip.is-hi{border-color:var(--yl);color:var(--yl)}
+.tchip.hq::after{content:"HQ";margin-left:8px;font-size:var(--t-micro);color:var(--yl)}
+/* phones: the chips carry the section; the map's 9px nodes are not a tap target */
+@media (max-width:900px){.area-grid{grid-template-columns:1fr}.area-map{display:none}}
+
+/* ============================================================ FOOTER + MINI BAR */
+.footer{border-top:1px solid var(--hair);background-color:var(--well);padding:var(--s4) 0 var(--s3)}
+.foot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s2);padding-bottom:var(--s3);border-bottom:1px solid var(--hair)}
+.foot-col{display:flex;flex-direction:column;gap:6px}
+.foot-col .hd{font-family:var(--mono);font-size:var(--t-micro);letter-spacing:var(--ls-wide);color:var(--steel);text-transform:uppercase}
+.foot-col a,.foot-col span:not(.hd){font-family:var(--mono);font-size:var(--t-body-s);color:var(--ink);text-decoration:none;letter-spacing:var(--ls-tight);display:inline-flex;align-items:center;min-height:var(--tap)}
+.foot-col a:hover{color:var(--yl)}
+.foot-base{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between;padding-top:var(--s2);font-family:var(--mono);font-size:var(--t-micro);letter-spacing:var(--ls-label);color:var(--steel);text-transform:uppercase}
+.foot-base b{color:var(--yl);font-weight:700}
+@media (max-width:900px){.foot-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.foot-grid{grid-template-columns:1fr}}
+.minibar{position:fixed;left:0;right:0;bottom:0;z-index:90;display:flex;align-items:center;justify-content:center;gap:12px;padding:10px var(--s2);padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(33,35,39,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--hair-hi);transform:translateY(110%)}
+.minibar.is-on{transform:none}
+.minibar .tel{display:inline-flex;align-items:center;min-height:var(--tap);padding:0 12px;font-family:var(--mono);font-weight:700;font-size:var(--t-btn);letter-spacing:var(--ls-ui);color:var(--yl);text-decoration:none;font-variant-numeric:tabular-nums}
+
+/* transitions: transform and opacity only, and only when motion is welcome */
+@media (prefers-reduced-motion:no-preference){
+ .nav-links > a:not(.btn)::after{transition:transform .18s ease}
+ .svc-head .ttl::after{transition:transform .22s cubic-bezier(.2,.9,.3,1.2)}
+ .svc-more{transition:opacity .28s ease,transform .32s cubic-bezier(.2,.9,.3,1.2),visibility 0s linear .28s}
+ .svc.is-open .svc-more{transition:opacity .28s ease,transform .32s cubic-bezier(.2,.9,.3,1.2),visibility 0s}
+ @media (hover:hover){.svc:hover .svc-more{transition:opacity .28s ease,transform .32s cubic-bezier(.2,.9,.3,1.2),visibility 0s}}
+ .tn{transition:transform .3s cubic-bezier(.2,.9,.3,1.3)}
+ .minibar{transition:transform .38s cubic-bezier(.2,.9,.3,1.1)}
+}
+</style>
+<!-- html.js is structural for the flow (stacked steps). The inline script strips it again if GSAP never arrives. -->
+<script>document.documentElement.classList.add('js');</script>
+<a class="skip" href="#top">Skip to content</a>
+<header class="nav">
+ <div class="wrap nav-in">
+  <a class="brand" href="#top" aria-label="Yavapai Waste Solutions, home">
+   <svg viewBox="0 0 68 52" aria-hidden="true" fill="none"><path d="M2 46 L18 18 L28 34 L40 8 L54 30 L66 46" stroke="#ffd100" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><path d="M2 50 H66" stroke="#3a3e44" stroke-width="2"/></svg>
+   <span><span class="wm">YWS</span><span class="tag">Yavapai Waste Solutions</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+   <a href="#services">Services</a>
+   <a href="#get-a-bin" data-sizes-link>Sizes</a>
+   <a href="#area">Service Area</a>
+   <a href="#pay">Pay My Bill</a>
+   <a class="nav-phone" href="tel:+19287132710"><span class="ph-l tab">(928) 713-2710</span><span class="ph-s">Call</span></a>
+   <a class="btn sm" href="#get-a-bin">Get a Bin</a>
+   <details class="nav-menu">
+    <summary>Menu</summary>
+    <div class="nav-drop">
+     <a href="#services">Services</a>
+     <a href="#get-a-bin" data-sizes-link>Sizes</a>
+     <a href="#area">Service Area</a>
+     <a href="#pay">Pay My Bill</a>
+    </div>
+   </details>
+  </nav>
+ </div>
+</header>
+
+<main id="top" tabindex="-1">
+<!-- ================= HERO: slogan + the flow + the 3D size visualizer ================= -->
+<section class="hero" aria-label="Get a bin">
+ <div class="hero-bggrid" aria-hidden="true"></div>
+ <div class="wrap hero-in">
+  <div class="hero-copy">
+   <h1 class="hero-title"><span class="line-mask"><span class="line">Let&rsquo;s Talk</span></span> <span class="line-mask"><span class="line yl">Trash.</span></span></h1>
+   <p class="hero-sub"><b>Veteran-owned</b> bins for the Prescott area since 1994.</p>
+
+   <section class="flow-wrap brkt" id="get-a-bin" aria-labelledby="flow-title" data-flow>
+    <b class="ck" aria-hidden="true"></b>
+    <h2 class="sr" id="flow-title">Get a Bin</h2>
+    <!-- ENDPOINT TBD: posts the plain form with JS off. With JS the submit is intercepted (SIMULATE in script). -->
+    <form class="flow" method="post" action="/api/lead">
+     <div class="flow-head">
+      <div class="rail-row">
+       <div class="rail" role="progressbar" aria-label="Booking progress" aria-valuemin="0" aria-valuemax="4" aria-valuenow="1" aria-valuetext="Step 1 of 4">
+        <span class="seg is-current"><i class="fill"></i></span><span class="seg"><i class="fill"></i></span><span class="seg"><i class="fill"></i></span><span class="seg"><i class="fill"></i></span>
+       </div>
+       <span class="counter" aria-hidden="true" data-counter>Step 1 of 4</span>
+      </div>
+      <div class="chips" data-chips>
+       <p class="chips-empty" data-chips-empty>Three taps, your number, and we call you.</p>
+      </div>
+      <p class="sr" aria-live="polite" data-announce></p>
+     </div>
+
+     <div class="steps">
+      <!-- The estimate rides in the row above the steps so the height glide carries it in. Step 1 collapses it (hidden). -->
+      <!-- PRICE TBD: placeholder numbers from the size radios plus a placeholder 7 day term. -->
+      <p class="estimate" data-estimate>
+       <span class="line" aria-hidden="true"><span data-price-line>From <b>$<span data-price>425</span></b><span data-price-unit> for 7 days</span></span><b data-price-tbd hidden>Quote on the call</b></span>
+       <small aria-hidden="true" data-price-note>Final quote on the call.</small>
+       <span class="sr" aria-live="polite" data-price-sr></span>
+      </p>
+      <!-- Step 1 -->
+      <section class="step" data-step="1" aria-labelledby="q1">
+       <div class="step-top" data-anim><h2 class="q" id="q1" tabindex="-1">What&rsquo;s it for?</h2></div>
+       <fieldset class="tiles">
+        <legend class="sr">What is the bin for?</legend>
+        <div class="tile" data-anim>
+         <input type="radio" id="svc-home" name="service" value="home" data-label="Home cleanout" data-chip="Home" required>
+         <label for="svc-home" data-advance><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span><b>Home cleanout</b><small>Garage, move, junk</small></span></label>
+        </div>
+        <div class="tile" data-anim>
+         <input type="radio" id="svc-construction" name="service" value="construction" data-label="Construction or remodel" data-chip="Construction">
+         <label for="svc-construction" data-advance><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4l6 6-2 2-6-6zM12 6L3 15l3 3 9-9"/></svg><span><b>Construction</b><small>Debris, roofing</small></span></label>
+        </div>
+        <div class="tile" data-anim>
+         <input type="radio" id="svc-business" name="service" value="business" data-label="Business pickup" data-chip="Business">
+         <label for="svc-business" data-advance><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M9 20v-6h6v6"/></svg><span><b>Business pickup</b><small>Shops and offices</small></span></label>
+        </div>
+        <div class="tile" data-anim>
+         <input type="radio" id="svc-other" name="service" value="other" data-label="Something else" data-chip="Other">
+         <label for="svc-other" data-advance><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7M12 17h.01"/></svg><span><b>Something else</b><small>Tell us on the call</small></span></label>
+        </div>
+       </fieldset>
+       <p class="hint" data-hint id="hint-1" aria-live="polite"></p>
+       <div class="actions" data-next-row><button type="button" class="btn" data-next>Next</button></div>
+      </section>
+
+      <!-- Step 2 -->
+      <section class="step" data-step="2" aria-labelledby="q2">
+       <div class="step-top" data-anim>
+        <button type="button" class="back" data-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Back</button>
+        <h2 class="q" id="q2" tabindex="-1">What size?</h2>
+       </div>
+       <figure class="scene" data-anim>
+        <!-- Side view at 12 px per foot. Ground fixed at y=140. Bins scale from their bottom edge. -->
+        <svg viewBox="0 0 700 168" role="img" aria-labelledby="scene-title" data-scene>
+         <title id="scene-title">Side view of the bin next to a person and a pickup truck for scale</title>
+         <line class="ground" x1="0" y1="140.5" x2="700" y2="140.5"/>
+         <g fill="currentColor" data-human><circle cx="34" cy="76" r="7"/><rect x="27" y="85" width="14" height="27" rx="4"/><rect x="21" y="87" width="5" height="24" rx="2.5"/><rect x="42" y="87" width="5" height="24" rx="2.5"/><rect x="27" y="110" width="6" height="30" rx="2"/><rect x="35" y="110" width="6" height="30" rx="2"/></g>
+         <text class="tag" x="34" y="160" text-anchor="middle">6 ft</text>
+         <g fill="currentColor" data-truck><path d="M70 122V98q0-6 6-6h50l16-24h52q6 0 6 6v26h98v22z"/><path class="p" d="M138 92l12-18h40v18z"/><circle cx="108" cy="128" r="13"/><circle class="p" cx="108" cy="128" r="5"/><circle cx="262" cy="128" r="13"/><circle class="p" cx="262" cy="128" r="5"/></g>
+         <text class="tag" x="184" y="160" text-anchor="middle">Pickup, 19 ft</text>
+         <g data-bin="ro"><rect x="320" y="68" width="264" height="64" rx="2" fill="#2a2d31" stroke="#4a4e55" stroke-width="2"/><rect x="316" y="63" width="272" height="6" rx="1" fill="#ffd100"/><rect x="328" y="132" width="248" height="8" rx="1" fill="#26282c" stroke="#4a4e55"/><g fill="#1d1f22"><rect x="358" y="74" width="4" height="52"/><rect x="396" y="74" width="4" height="52"/><rect x="434" y="74" width="4" height="52"/><rect x="472" y="74" width="4" height="52"/><rect x="510" y="74" width="4" height="52"/><rect x="548" y="74" width="4" height="52"/></g><circle cx="566" cy="136" r="3" fill="#585d64"/></g>
+         <text class="tag" x="452" y="160" text-anchor="middle" data-bin-label>22 ft long</text>
+         <g data-bin="fl"><path d="M610 84L682 60V132H610z" fill="#2a2d31" stroke="#4a4e55" stroke-width="2"/><path d="M606 86L684 60" stroke="#ffd100" stroke-width="5" stroke-linecap="round" fill="none"/><rect x="606" y="108" width="80" height="6" fill="#1d1f22"/><circle cx="619" cy="136" r="4" fill="#585d64"/><circle cx="673" cy="136" r="4" fill="#585d64"/></g>
+         <text class="tag" x="646" y="160" text-anchor="middle">Front-load</text>
+        </svg>
+        <figcaption class="spec"><span class="yd" data-yd>30 yard</span><span class="dims" data-dims>22 x 8 x 6 ft</span><span class="fits" data-fits>About 12 pickup loads</span></figcaption>
+       </figure>
+       <div class="sizes" data-sizes-wrap data-anim>
+        <!-- PRICE TBD and HOLDS TBD: placeholders feeding the estimate. Not-sure tiles carry no price. -->
+        <!-- Legends are screen-reader only: the customer never chose "roll-off" or "front-load", the service tile chose it for them. -->
+        <fieldset data-sizes="ro">
+         <legend class="sr">Roll-off sizes</legend>
+         <div class="tiles compact">
+          <div class="tile"><input type="radio" id="sz-10" name="size" value="ro-10" data-type="ro" data-yd="10" data-dims="12 x 8 x 3.5 ft" data-len="12 ft long" data-holds="About 4 pickup loads" data-price="325" data-sx=".545" data-sy=".583" required><label for="sz-10" data-advance><span><b>10 yard</b><small>4 loads</small></span><span class="sr">, 12 by 8 by 3.5 feet</span></label></div>
+          <div class="tile"><input type="radio" id="sz-15" name="size" value="ro-15" data-type="ro" data-yd="15" data-dims="14 x 8 x 4.5 ft" data-len="14 ft long" data-holds="About 6 pickup loads" data-price="375" data-sx=".636" data-sy=".75"><label for="sz-15" data-advance><span><b>15 yard</b><small>6 loads</small></span><span class="sr">, 14 by 8 by 4.5 feet</span></label></div>
+          <div class="tile"><input type="radio" id="sz-20" name="size" value="ro-20" data-type="ro" data-yd="20" data-dims="16 x 8 x 5.5 ft" data-len="16 ft long" data-holds="About 8 pickup loads" data-price="425" data-sx=".727" data-sy=".917"><label for="sz-20" data-advance><span><b>20 yard</b><small>8 loads</small></span><span class="sr">, 16 by 8 by 5.5 feet</span></label></div>
+          <div class="tile"><input type="radio" id="sz-30" name="size" value="ro-30" data-type="ro" data-yd="30" data-dims="22 x 8 x 6 ft" data-len="22 ft long" data-holds="About 12 pickup loads" data-price="525" data-sx="1" data-sy="1"><label for="sz-30" data-advance><span><b>30 yard</b><small>12 loads</small></span><span class="sr">, 22 by 8 by 6 feet</span></label></div>
+          <div class="tile"><input type="radio" id="sz-ro-tbd" name="size" value="ro-tbd" data-type="ro" data-tbd data-chip="Size on the call"><label for="sz-ro-tbd" data-advance><span><b>Not sure</b><small>We size it on the call</small></span></label></div>
+         </div>
+        </fieldset>
+        <fieldset data-sizes="fl">
+         <legend class="sr">Front-load sizes</legend>
+         <div class="tiles compact">
+          <div class="tile"><input type="radio" id="sz-2" name="size" value="fl-2" data-type="fl" data-yd="2" data-dims="6 x 3 x 3 ft" data-len="3 ft deep" data-holds="About 12 bags" data-price="95" data-sx=".5" data-sy=".429"><label for="sz-2" data-advance><span><b>2 yard</b><small>12 bags</small></span><span class="sr">, 6 by 3 by 3 feet</span></label></div>
+          <div class="tile"><input type="radio" id="sz-3" name="size" value="fl-3" data-type="fl" data-yd="3" data-dims="6 x 3.5 x 4 ft" data-len="3.5 ft deep" data-holds="About 18 bags" data-price="115" data-sx=".583" data-sy=".571"><label for="sz-3" data-advance><span><b>3 yard</b><small>18 bags</small></span><span class="sr">, 6 by 3.5 by 4 feet</span></label></div>
+          <div class="tile"><input type="radio" id="sz-4" name="size" value="fl-4" data-type="fl" data-yd="4" data-dims="6 x 4.5 x 4.5 ft" data-len="4.5 ft deep" data-holds="About 24 bags" data-price="135" data-sx=".75" data-sy=".643"><label for="sz-4" data-advance><span><b>4 yard</b><small>24 bags</small></span><span class="sr">, 6 by 4.5 by 4.5 feet</span></label></div>
+          <div class="tile"><input type="radio" id="sz-6" name="size" value="fl-6" data-type="fl" data-yd="6" data-dims="6 x 5.5 x 6 ft" data-len="5.5 ft deep" data-holds="About 36 bags" data-price="175" data-sx=".917" data-sy=".857"><label for="sz-6" data-advance><span><b>6 yard</b><small>36 bags</small></span><span class="sr">, 6 by 5.5 by 6 feet</span></label></div>
+          <div class="tile"><input type="radio" id="sz-8" name="size" value="fl-8" data-type="fl" data-yd="8" data-dims="6 x 6 x 7 ft" data-len="6 ft deep" data-holds="About 48 bags" data-price="215" data-sx="1" data-sy="1"><label for="sz-8" data-advance><span><b>8 yard</b><small>48 bags</small></span><span class="sr">, 6 by 6 by 7 feet</span></label></div>
+          <div class="tile"><input type="radio" id="sz-fl-tbd" name="size" value="fl-tbd" data-type="fl" data-tbd data-chip="Size on the call"><label for="sz-fl-tbd" data-advance><span><b>Not sure</b><small>We size it on the call</small></span></label></div>
+         </div>
+        </fieldset>
+       </div>
+       <p class="hint" data-hint id="hint-2" aria-live="polite"></p>
+       <div class="actions" data-next-row><button type="button" class="btn" data-next>Next</button></div>
+      </section>
+
+      <!-- Step 3 -->
+      <section class="step" data-step="3" aria-labelledby="q3">
+       <div class="step-top" data-anim>
+        <button type="button" class="back" data-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Back</button>
+        <h2 class="q" id="q3" tabindex="-1">When and where?</h2>
+       </div>
+       <div class="when" data-anim>
+        <label class="label" for="yws-date" data-date-label>Drop-off day</label>
+        <input class="input" type="date" id="yws-date" name="date" required>
+       </div>
+       <fieldset data-anim>
+        <legend class="label">Town</legend>
+        <!-- PRICE TBD: data-adj is a placeholder travel adder per town. -->
+        <div class="pills">
+         <div class="pill"><input type="radio" id="tn-prescott" name="town" value="prescott" data-label="Prescott" data-adj="0" required><label for="tn-prescott" data-advance>Prescott</label></div>
+         <div class="pill"><input type="radio" id="tn-prescott-valley" name="town" value="prescott-valley" data-label="Prescott Valley" data-adj="0"><label for="tn-prescott-valley" data-advance>Prescott Valley</label></div>
+         <div class="pill"><input type="radio" id="tn-chino-valley" name="town" value="chino-valley" data-label="Chino Valley" data-adj="15"><label for="tn-chino-valley" data-advance>Chino Valley</label></div>
+         <div class="pill"><input type="radio" id="tn-paulden" name="town" value="paulden" data-label="Paulden" data-adj="35"><label for="tn-paulden" data-advance>Paulden</label></div>
+         <div class="pill"><input type="radio" id="tn-cordes-junction" name="town" value="cordes-junction" data-label="Cordes Junction" data-adj="45"><label for="tn-cordes-junction" data-advance>Cordes Junction</label></div>
+         <div class="pill"><input type="radio" id="tn-williamson-valley" name="town" value="williamson-valley" data-label="Williamson Valley" data-adj="20"><label for="tn-williamson-valley" data-advance>Williamson Valley</label></div>
+         <div class="pill"><input type="radio" id="tn-dewey" name="town" value="dewey" data-label="Dewey" data-adj="15"><label for="tn-dewey" data-advance>Dewey</label></div>
+         <div class="pill"><input type="radio" id="tn-humboldt" name="town" value="humboldt" data-label="Humboldt" data-adj="20"><label for="tn-humboldt" data-advance>Humboldt</label></div>
+         <div class="pill"><input type="radio" id="tn-other" name="town" value="other" data-label="Town not listed" data-chip="Other town" data-recap="town not listed" data-adj="0"><label for="tn-other" data-advance>Not listed</label></div>
+        </div>
+       </fieldset>
+       <p class="hint" data-hint id="hint-3" aria-live="polite"></p>
+       <div class="actions" data-next-row><button type="button" class="btn" data-next>Next</button></div>
+      </section>
+
+      <!-- Step 4 -->
+      <section class="step" data-step="4" aria-labelledby="q4">
+       <div class="step-top" data-anim>
+        <button type="button" class="back" data-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Back</button>
+        <h2 class="q" id="q4" tabindex="-1">Who do we call?</h2>
+       </div>
+       <div class="fields" data-fields>
+        <div class="field" data-anim><label class="label" for="yws-name">Name</label><input class="input" type="text" id="yws-name" name="name" autocomplete="name" autocapitalize="words" enterkeyhint="next" aria-describedby="hint-4" required></div>
+        <div class="field" data-anim><label class="label" for="yws-phone">Phone</label><input class="input" type="tel" id="yws-phone" name="phone" autocomplete="tel" inputmode="tel" enterkeyhint="done" aria-describedby="hint-4" required></div>
+        <p class="hint" data-hint id="hint-4" aria-live="polite"></p>
+        <!-- Spec puts the brand line on this button; the button says what happens. Swap only if the owner insists. -->
+        <div class="actions who" data-anim>
+         <button type="submit" class="btn" data-submit>Call me back</button>
+         <p class="alt">Rather talk? <a href="tel:+19287132710" class="tab">Call (928) 713-2710</a></p>
+        </div>
+       </div>
+       <div data-done></div>
+       <template id="yws-done-tpl">
+        <div class="done" role="status" tabindex="-1" data-done-card>
+         <p class="done-msg" data-anim>We call you within the hour, Mon to Fri 8 to 5.</p>
+         <p class="done-recap" data-recap data-anim></p>
+         <a class="btn line" href="tel:+19287132710" data-anim>Call (928) 713-2710</a>
+        </div>
+       </template>
+      </section>
+     </div>
+    </form>
+   </section>
+  </div>
+
+  <!-- 3D dumpster: the size step visual on desktop. Dimmed and still on step 1, wakes on step 2, rescales as sizes are picked. -->
+  <div class="hero-stagewrap" aria-hidden="true">
+   <div class="hero-viz" id="rig">
+    <div class="hero-floor"></div>
+    <div class="rig-person">
+     <svg viewBox="0 0 40 120"><circle cx="20" cy="14" r="10" fill="#585d64"/><path d="M20 26 V74 M20 36 L4 58 M20 36 L36 58 M20 74 L8 112 M20 74 L32 112" stroke="#585d64" stroke-width="6" stroke-linecap="round" fill="none"/></svg>
+     <span class="cap">6 ft</span>
+    </div>
+    <div class="scale-anchor">
+     <div class="stage"><div class="tilt"><div class="dragyaw" id="dragyaw"><div class="box" id="box">
+      <div class="face face--front">
+       <svg viewBox="0 0 460 230">
+        <defs>
+         <filter id="spray" x="-4%" y="-8%" width="108%" height="116%"><feTurbulence type="fractalNoise" baseFrequency=".22" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6"/></filter>
+         <linearGradient id="steelv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#33373c"/><stop offset=".5" stop-color="#2a2d31"/><stop offset="1" stop-color="#222429"/></linearGradient>
+         <g id="ribs"><line x1="64" y1="30" x2="64" y2="198"/><line x1="122" y1="30" x2="122" y2="198"/><line x1="180" y1="30" x2="180" y2="198"/><line x1="238" y1="30" x2="238" y2="198"/><line x1="296" y1="30" x2="296" y2="198"/><line x1="354" y1="30" x2="354" y2="198"/><line x1="412" y1="30" x2="412" y2="198"/></g>
+        </defs>
+        <rect x="6" y="14" width="448" height="186" fill="url(#steelv)" stroke="#4a4e55" stroke-width="2"/>
+        <rect x="6" y="14" width="448" height="14" fill="#3a3e44"/>
+        <use href="#ribs" stroke="#1d1f22" stroke-width="3" opacity=".85"/><use href="#ribs" x="2" stroke="#4a4e55" stroke-width="1" opacity=".6"/>
+        <g filter="url(#spray)" data-rig-decal>
+         <text x="230" y="106" text-anchor="middle" font-family="'Big Shoulders Display',Impact,sans-serif" font-weight="800" font-size="52" fill="#ffd100" letter-spacing="3" transform="rotate(-1.2 230 106)">LET&rsquo;S TALK TRASH</text>
+         <text x="230" y="140" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-weight="700" font-size="15" fill="#f2f1ee" letter-spacing="6" opacity=".85">(928) 713-2710 &middot; PRESCOTT AZ</text>
+        </g>
+        <rect x="6" y="176" width="448" height="24" fill="#26282c" stroke="#4a4e55" stroke-width="1.5"/>
+        <rect x="86" y="180" width="52" height="16" fill="#111214" stroke="#4a4e55"/><rect x="322" y="180" width="52" height="16" fill="#111214" stroke="#4a4e55"/>
+        <circle cx="44" cy="212" r="15" fill="#101113" stroke="#4a4e55" stroke-width="3"/><circle cx="44" cy="212" r="4" fill="#585d64"/>
+        <circle cx="416" cy="212" r="15" fill="#101113" stroke="#4a4e55" stroke-width="3"/><circle cx="416" cy="212" r="4" fill="#585d64"/>
+        <g fill="#ffd100"><rect x="6" y="14" width="26" height="8"/><rect x="6" y="14" width="8" height="26"/><rect x="428" y="14" width="26" height="8"/><rect x="446" y="14" width="8" height="26"/></g>
+       </svg>
+      </div>
+      <div class="face face--back">
+       <svg viewBox="0 0 460 230">
+        <rect x="6" y="14" width="448" height="186" fill="#2a2d31" stroke="#4a4e55" stroke-width="2"/>
+        <rect x="6" y="14" width="448" height="14" fill="#3a3e44"/>
+        <use href="#ribs" stroke="#1d1f22" stroke-width="3" opacity=".85"/>
+        <text x="230" y="118" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-weight="700" font-size="14" fill="#ffd100" letter-spacing="5">UNIT 07 &middot; YWSAZ.COM</text>
+        <rect x="6" y="176" width="448" height="24" fill="#26282c" stroke="#4a4e55" stroke-width="1.5"/>
+        <circle cx="44" cy="212" r="15" fill="#101113" stroke="#4a4e55" stroke-width="3"/><circle cx="416" cy="212" r="15" fill="#101113" stroke="#4a4e55" stroke-width="3"/>
+       </svg>
+      </div>
+      <div class="face face--left">
+       <svg viewBox="0 0 200 230">
+        <rect x="4" y="14" width="192" height="186" fill="#232529" stroke="#4a4e55" stroke-width="2"/><rect x="4" y="14" width="192" height="14" fill="#33363b"/>
+        <rect x="58" y="44" width="84" height="14" rx="7" fill="#111214" stroke="#4a4e55" stroke-width="2"/><path d="M100 58 V96" stroke="#4a4e55" stroke-width="8"/>
+        <text x="100" y="140" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-weight="700" font-size="16" fill="#ffd100" letter-spacing="3">YWS-07</text>
+        <text x="100" y="162" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9ba0a6" letter-spacing="2">HOOK LIFT</text>
+        <rect x="4" y="176" width="192" height="24" fill="#1f2125" stroke="#4a4e55" stroke-width="1.5"/>
+       </svg>
+      </div>
+      <div class="face face--right">
+       <svg viewBox="0 0 200 230">
+        <rect x="4" y="14" width="192" height="186" fill="#232529" stroke="#4a4e55" stroke-width="2"/><rect x="4" y="14" width="192" height="14" fill="#33363b"/>
+        <rect x="24" y="44" width="152" height="150" fill="#26282c" stroke="#4a4e55" stroke-width="2"/>
+        <g fill="#111214" stroke="#4a4e55"><rect x="16" y="60" width="10" height="26"/><rect x="16" y="150" width="10" height="26"/></g>
+        <rect x="150" y="108" width="18" height="10" fill="#ffd100"/>
+        <text x="100" y="128" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#9ba0a6" letter-spacing="2">SWING DOOR</text>
+        <rect x="4" y="176" width="192" height="24" fill="#1f2125" stroke="#4a4e55" stroke-width="1.5"/>
+       </svg>
+      </div>
+      <div class="face face--bottom"></div>
+      <div class="face face--lid">
+       <svg viewBox="0 0 460 200">
+        <rect x="6" y="4" width="448" height="192" fill="#26282c" stroke="#4a4e55" stroke-width="2"/>
+        <use href="#ribs" y="-20" stroke="#1d1f22" stroke-width="3" opacity=".8"/>
+       </svg>
+      </div>
+     </div></div></div></div>
+     <div class="box-shadow"></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section class="sec" id="services">
+ <div class="wrap">
+  <div class="sechead rv">
+   <h2>What we haul</h2>
+  </div>
+  <div class="svc-grid">
+   <article class="svc rivets rv" data-svc>
+    <h3 class="svc-h"><button type="button" class="svc-head" aria-expanded="false" aria-controls="svc-more-1">
+     <svg viewBox="0 0 44 36" aria-hidden="true"><path d="M8 10 L36 10 L34 28 L10 28 Z" fill="#2a2d31" stroke="#4a4e55" stroke-width="2"/><rect x="6" y="8" width="32" height="4" fill="#ffd100"/><circle cx="13" cy="31" r="3" fill="#101113" stroke="#4a4e55" stroke-width="2"/><circle cx="31" cy="31" r="3" fill="#101113" stroke="#4a4e55" stroke-width="2"/></svg>
+     <span class="ttl">Roll-Off Rentals</span>
+    </button></h3>
+    <div class="svc-more" id="svc-more-1">
+     <p>Driveway drop. Hauled when you say so.</p>
+     <button type="button" class="btn sm" data-start="home">Start here</button>
+    </div>
+   </article>
+   <article class="svc rivets rv" data-svc>
+    <h3 class="svc-h"><button type="button" class="svc-head" aria-expanded="false" aria-controls="svc-more-2">
+     <svg viewBox="0 0 44 36" aria-hidden="true"><path d="M10 14 L34 14 L34 30 L10 30 Z" fill="#2a2d31" stroke="#4a4e55" stroke-width="2"/><path d="M8 14 L36 14 L32 6 L12 6 Z" fill="#33363b" stroke="#4a4e55" stroke-width="2"/><rect x="10" y="14" width="24" height="3" fill="#ffd100"/></svg>
+     <span class="ttl">Front-Load Service</span>
+    </button></h3>
+    <div class="svc-more" id="svc-more-2">
+     <p>Weekly pickups for shops and complexes.</p>
+     <button type="button" class="btn sm" data-start="business">Start here</button>
+    </div>
+   </article>
+   <article class="svc rivets rv" data-svc>
+    <h3 class="svc-h"><button type="button" class="svc-head" aria-expanded="false" aria-controls="svc-more-3">
+     <svg viewBox="0 0 44 36" aria-hidden="true"><path d="M6 30 L16 14 L22 22 L30 8 L40 30" fill="none" stroke="#4a4e55" stroke-width="3" stroke-linejoin="round"/><rect x="26" y="20" width="14" height="10" fill="#2a2d31" stroke="#4a4e55" stroke-width="2"/><rect x="26" y="20" width="14" height="3" fill="#ffd100"/></svg>
+     <span class="ttl">Construction Bins</span>
+    </button></h3>
+    <div class="svc-more" id="svc-more-3">
+     <p>Demo to punch list. Swaps when full.</p>
+     <button type="button" class="btn sm" data-start="construction">Start here</button>
+    </div>
+   </article>
+  </div>
+ </div>
+</section>
+
+<!-- ================= TRUST STRIP ================= -->
+<section class="sec" id="trust" aria-label="Credentials">
+ <div class="wrap">
+  <div class="plates">
+   <div class="plate rivets rv">
+    <svg viewBox="0 0 44 38" aria-hidden="true"><path d="M22 2 L24.4 8.7 L31.5 8.9 L25.9 13.3 L27.9 20.1 L22 16 L16.1 20.1 L18.1 13.3 L12.5 8.9 L19.6 8.7 Z" fill="none" stroke="#c9cdd2" stroke-width="2" stroke-linejoin="round"/><path d="M13 26 L22 31 L31 26" fill="none" stroke="#c9cdd2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 31 L22 36 L31 31" fill="none" stroke="#c9cdd2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/></svg>
+    <span><span class="etch">Veteran-Owned</span><span class="etch-sub">And operated</span></span>
+   </div>
+   <div class="plate rivets rv">
+    <svg viewBox="0 0 44 38" aria-hidden="true"><path d="M38 7 H27 V19 a9 9 0 0 1 -18 0 V13" fill="none" stroke="#c9cdd2" stroke-width="3" stroke-linecap="round"/><path d="M4 13 H14" stroke="#c9cdd2" stroke-width="3" stroke-linecap="round" opacity=".5"/></svg>
+    <span><span class="etch">32 Years Local</span><span class="etch-sub">Prescott area since 1994</span></span>
+   </div>
+   <div class="plate rivets rv">
+    <svg viewBox="0 0 44 38" aria-hidden="true"><rect x="6" y="6" width="32" height="26" fill="none" stroke="#c9cdd2" stroke-width="2.5"/><path d="M13 19 L19 25 L31 13" fill="none" stroke="#ffd100" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span><span class="etch">SBA Cert. Pending</span><span class="etch-sub">Application in progress</span></span>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= ONE ROTATING QUOTE ================= -->
+<section class="sec" id="word" aria-label="Word around town">
+ <div class="wrap">
+  <!-- PLACEHOLDER QUOTES: invented for the mockup. Replace with verbatim customer quotes (with permission) before any showing. -->
+  <div class="quote rivets rv" data-quote>
+   <div>
+    <blockquote data-q>&ldquo;Bin was in the driveway by 8am. Gone before the weekend.&rdquo;</blockquote>
+    <span class="cite" aria-live="polite" data-c><b>Mike</b> &middot; Prescott Valley</span>
+   </div>
+   <div class="quote-ctl">
+    <button type="button" data-quote-prev aria-label="Previous quote"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button type="button" data-quote-next aria-label="Next quote"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= SERVICE AREA ================= -->
+<section class="sec" id="area">
+ <div class="wrap">
+  <div class="sechead rv">
+   <h2>Where we roll</h2>
+   <p class="sub">Eight towns, one yard, our own trucks.</p>
+  </div>
+  <div class="area-grid">
+   <div class="area-map rv">
+    <svg viewBox="0 0 520 340" role="group" aria-label="Map of the eight towns we serve. Pick a town to book there.">
+     <rect width="520" height="340" fill="#212327"/>
+     <path d="M0 250 L60 190 L110 232 L170 150 L215 210 L260 176 L330 236 L390 168 L450 224 L520 186 L520 340 L0 340 Z" fill="#26282c"/>
+     <path d="M0 300 L80 252 L150 292 L240 240 L330 296 L420 250 L520 288 L520 340 L0 340 Z" fill="#1c1e21"/>
+     <g fill="none" stroke="#3a3e44" opacity=".55"><circle cx="235" cy="205" r="60"/><circle cx="235" cy="205" r="115"/><circle cx="235" cy="205" r="170"/></g>
+     <g class="tn" data-town="prescott" tabindex="0" role="button" aria-label="Book in Prescott"><rect x="228" y="198" width="14" height="14" fill="#ffd100" transform="rotate(45 235 205)"/><circle cx="235" cy="205" r="9" fill="none" stroke="#ffd100" opacity=".5"/><text x="235" y="188" text-anchor="middle" fill="#ffd100" font-weight="700">PRESCOTT &middot; HQ</text></g>
+     <g class="tn" data-town="prescott-valley" tabindex="0" role="button" aria-label="Book in Prescott Valley"><circle cx="300" cy="150" r="5"/><text x="310" y="146">PRESCOTT VALLEY</text></g>
+     <g class="tn" data-town="chino-valley" tabindex="0" role="button" aria-label="Book in Chino Valley"><circle cx="212" cy="96" r="5"/><text x="222" y="92">CHINO VALLEY</text></g>
+     <g class="tn" data-town="paulden" tabindex="0" role="button" aria-label="Book in Paulden"><circle cx="176" cy="46" r="5"/><text x="186" y="42">PAULDEN</text></g>
+     <g class="tn" data-town="cordes-junction" tabindex="0" role="button" aria-label="Book in Cordes Junction"><circle cx="418" cy="300" r="5"/><text x="408" y="296" text-anchor="end">CORDES JUNCTION</text></g>
+     <g class="tn" data-town="williamson-valley" tabindex="0" role="button" aria-label="Book in Williamson Valley"><circle cx="124" cy="150" r="5"/><text x="114" y="146" text-anchor="end">WILLIAMSON VALLEY</text></g>
+     <g class="tn" data-town="dewey" tabindex="0" role="button" aria-label="Book in Dewey"><circle cx="352" cy="226" r="5"/><text x="362" y="222">DEWEY</text></g>
+     <g class="tn" data-town="humboldt" tabindex="0" role="button" aria-label="Book in Humboldt"><circle cx="380" cy="262" r="5"/><text x="390" y="258">HUMBOLDT</text></g>
+    </svg>
+   </div>
+   <div class="area-side rv">
+    <div class="tchips" role="group" aria-label="Towns served">
+     <button type="button" class="tchip hq" data-town="prescott">Prescott</button>
+     <button type="button" class="tchip" data-town="prescott-valley">Prescott Valley</button>
+     <button type="button" class="tchip" data-town="chino-valley">Chino Valley</button>
+     <button type="button" class="tchip" data-town="paulden">Paulden</button>
+     <button type="button" class="tchip" data-town="cordes-junction">Cordes Junction</button>
+     <button type="button" class="tchip" data-town="williamson-valley">Williamson Valley</button>
+     <button type="button" class="tchip" data-town="dewey">Dewey</button>
+     <button type="button" class="tchip" data-town="humboldt">Humboldt</button>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer dplate">
+ <div class="wrap">
+  <div class="foot-grid">
+   <div class="foot-col"><span class="hd">Call</span><a href="tel:+19287132710" class="tab">(928) 713-2710</a></div>
+   <div class="foot-col"><span class="hd">Email</span><a href="mailto:sales@ywsaz.com">sales@ywsaz.com</a></div>
+   <div class="foot-col"><span class="hd">Hours</span><span>Mon to Fri, 8 to 5</span></div>
+   <div class="foot-col" id="pay"><span class="hd">Pay My Bill</span><!-- TODO: swap href for the live TrashLab billing portal URL before launch --><a href="#pay">Open billing portal <span aria-hidden="true">&nearr;</span></a></div>
+  </div>
+  <div class="foot-base">
+   <span><b>YWS</b> &copy; 2026 &middot; Yavapai Waste Solutions &middot; Prescott, AZ</span>
+   <span>Mockup</span>
+  </div>
+ </div>
+</footer>
+
+<!-- Sticky mini bar: appears once the hero scrolls away -->
+<div class="minibar" data-minibar>
+ <a class="tel" href="tel:+19287132710">(928) 713-2710</a>
+ <a class="btn sm" href="#get-a-bin" data-minibar-book>Get a Bin</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+ 'use strict';
+ var doc = document;
+ var root = doc.querySelector('[data-flow]');
+ /* No GSAP: drop the js hook so the four stacked steps and the plain post come back. Nothing stays hidden. */
+ if (!root || typeof gsap === 'undefined') { doc.documentElement.classList.remove('js'); return; }
+ if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+ var motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ var D = function (s) { return motion ? s : 0; };
+ var mm = gsap.matchMedia();
+ mm.add('(prefers-reduced-motion: reduce)', function () { motion = false; return function () { motion = true; }; });
+ var coarse = window.matchMedia('(pointer: coarse)').matches;
+ var rigHook = null; /* installed by the 3D rig scope: (sizeData, picked, instant) */
+ var rigStepHook = null; /* installed by the 3D rig scope: (step, instant). Dims and stills the rig on step 1. */
+ var navEl = doc.querySelector('.nav');
+
+ /* ===================== GET A BIN FLOW (reference component, unchanged state machine) ===================== */
+ var form = root.querySelector('form');
+ var stepsBox = root.querySelector('.steps');
+ var steps = Array.prototype.slice.call(root.querySelectorAll('.step'));
+ var segs = Array.prototype.slice.call(root.querySelectorAll('.seg'));
+ var fills = segs.map(function (s) { return s.querySelector('.fill'); });
+ var rail = root.querySelector('.rail');
+ var counter = root.querySelector('[data-counter]');
+ var announce = root.querySelector('[data-announce]');
+ var chipsBox = root.querySelector('[data-chips]');
+ var chipsEmpty = root.querySelector('[data-chips-empty]');
+ var estimateEl = root.querySelector('[data-estimate]');
+ var priceLine = root.querySelector('[data-price-line]');
+ var priceTbd = root.querySelector('[data-price-tbd]');
+ var priceEl = root.querySelector('[data-price]');
+ var priceUnit = root.querySelector('[data-price-unit]');
+ var priceNote = root.querySelector('[data-price-note]');
+ var priceSr = root.querySelector('[data-price-sr]');
+ var scene = root.querySelector('[data-scene]');
+ var bins = { ro: scene.querySelector('[data-bin="ro"]'), fl: scene.querySelector('[data-bin="fl"]') };
+ var binLabel = scene.querySelector('[data-bin-label]');
+ var sizesWrap = root.querySelector('[data-sizes-wrap]');
+ var sizeSets = { ro: root.querySelector('[data-sizes="ro"]'), fl: root.querySelector('[data-sizes="fl"]') };
+ var spec = { yd: root.querySelector('[data-yd]'), dims: root.querySelector('[data-dims]'), fits: root.querySelector('[data-fits]') };
+ var dateEl = root.querySelector('#yws-date');
+ var dateLabel = root.querySelector('[data-date-label]');
+ var nameEl = root.querySelector('#yws-name');
+ var phoneEl = root.querySelector('#yws-phone');
+ var submitBtn = root.querySelector('[data-submit]');
+ var submitLabel = submitBtn.textContent;
+ var fieldsBox = root.querySelector('[data-fields]');
+ var doneSlot = root.querySelector('[data-done]');
+ var tpl = root.querySelector('#yws-done-tpl');
+ var nextRows = steps.map(function (s) { return s.querySelector('[data-next-row]'); });
+
+ var state = { step: 1, service: null, size: null, town: null, date: '', dateSet: false, name: '', phone: '', sent: false };
+ var DEFAULT_PREVIEW = { ro: 'ro-20', fl: 'fl-4' };
+ var TBD_SIZE = { ro: 'ro-tbd', fl: 'fl-tbd' };
+ var FL_X = -194;
+ var TEL = '(928) 713-2710', TEL_HREF = 'tel:+19287132710';
+ /* ENDPOINT TBD: SIMULATE fakes the POST for the mockup. */
+ var ENDPOINT = form.getAttribute('action');
+ var SIMULATE = true;
+ var price = { v: 0 };
+ var lastPriceKey = '';
+ var advanceIntent = null, moving = null, pending = null, sending = false;
+ var sizeByType = { ro: null, fl: null };
+ var autoTbd = false;
+
+ function radio(name, value) { return form.querySelector('input[name="' + name + '"][value="' + value + '"]'); }
+ function checkedRadio(name) { return form.querySelector('input[name="' + name + '"]:checked'); }
+ function labelFor(input) { return form.querySelector('label[for="' + input.id + '"]'); }
+ function binType() { return state.service === 'business' ? 'fl' : 'ro'; }
+ function sizeData(key) {
+  var i = radio('size', key); if (!i) return null;
+  return { key: key, type: i.dataset.type, tbd: i.hasAttribute('data-tbd'), chip: i.dataset.chip, yd: i.dataset.yd, dims: i.dataset.dims, len: i.dataset.len, holds: i.dataset.holds, price: +i.dataset.price || 0, sx: +i.dataset.sx, sy: +i.dataset.sy };
+ }
+ function townData(key) {
+  var i = radio('town', key); if (!i) return null;
+  return { key: key, name: i.dataset.label, chip: i.dataset.chip || i.dataset.label, recap: i.dataset.recap || i.dataset.label, adj: +i.dataset.adj || 0 };
+ }
+ function iso(d) { var m = d.getMonth() + 1, day = d.getDate(); return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day; }
+ /* DELIVERY DAYS TBD: Mon to Fri, matching the callback promise. */
+ function nextWeekday(d) { var n = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1); while (n.getDay() === 0 || n.getDay() === 6) n.setDate(n.getDate() + 1); return n; }
+ function niceDate(s) { if (!s) return ''; var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); }
+ function firstName(s) { var f = String(s || '').trim().split(/\s+/)[0] || ''; return f.length <= 20 ? f : ''; }
+ function hint(n, text, html) {
+  var el = steps[n - 1].querySelector('[data-hint]'); if (!el) return;
+  var was = el.offsetHeight;
+  if (html) el.innerHTML = html; else el.textContent = text || '';
+  /* a hint that wraps to a second line grows the step; the box follows */
+  if (n === state.step && el.offsetHeight !== was) fitSteps();
+ }
+ function stepValue(n) { return n === 1 ? state.service : n === 2 ? state.size : n === 3 ? state.town : null; }
+ function schedule(delay, fn) { if (pending) pending.kill(); pending = gsap.delayedCall(delay, function () { pending = null; fn(); }); }
+ function cancelPending() { if (pending) { pending.kill(); pending = null; } }
+
+ /* Selection pop: 1.04 then spring settle, under 400 ms. Shared with the services and town chips. */
+ function pop(el) {
+  if (!el) return;
+  gsap.killTweensOf(el);
+  gsap.timeline().to(el, { scale: 1.04, duration: D(0.12), ease: 'power2.out' }).to(el, { scale: 1, duration: D(0.26), ease: 'back.out(1.6)' });
+ }
+ function sizeToShow() { var d = state.size ? sizeData(state.size) : null; return d && !d.tbd ? d.key : DEFAULT_PREVIEW[binType()]; }
+
+ /* Dumpster morph: the side-view bin scales from its bottom edge; the 3D rig follows through rigHook. */
+ function morph(key, instant) {
+  var d = sizeData(key); if (!d) return;
+  if (d.tbd) { key = DEFAULT_PREVIEW[d.type]; d = sizeData(key); }
+  gsap.to(bins[d.type], { scaleX: d.sx, scaleY: d.sy, duration: instant ? 0 : D(0.7), ease: 'elastic.out(1, 0.6)', overwrite: 'auto' });
+  var picked = key === state.size;
+  if (rigHook) rigHook(d, picked, instant);
+  var ydText = (picked ? '' : 'Shown: ') + d.yd + ' yard';
+  if (spec.yd.textContent !== ydText || spec.dims.textContent !== d.dims) {
+   spec.yd.textContent = ydText; spec.dims.textContent = d.dims; spec.fits.textContent = d.holds; binLabel.textContent = d.len;
+   if (!instant) gsap.fromTo([spec.yd, spec.dims, spec.fits], { y: 6, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: D(0.3), ease: 'power3.out', stagger: D(0.04), overwrite: 'auto' });
+  }
+ }
+ function syncSizeSet(instant) {
+  var t = binType(), o = t === 'ro' ? 'fl' : 'ro';
+  sizeSets[t].hidden = false; sizeSets[o].hidden = true;
+  if (state.size && sizeData(state.size).type !== t) {
+   sizeByType[sizeData(state.size).type] = state.size;
+   var c = checkedRadio('size'); if (c) c.checked = false;
+   state.size = null;
+  }
+  /* restore the size this family had before the customer changed their mind */
+  if (!state.size && sizeByType[t]) { state.size = sizeByType[t]; radio('size', state.size).checked = true; autoTbd = false; }
+  dateLabel.textContent = t === 'fl' ? 'Start day' : 'Drop-off day';
+  gsap.to(bins[o], { autoAlpha: 0, duration: instant ? 0 : D(0.2), overwrite: 'auto' });
+  gsap.to(bins[t], { autoAlpha: 1, duration: instant ? 0 : D(0.3), overwrite: 'auto' });
+  morph(sizeToShow(), instant);
+ }
+ /* The Next row leaves layout when it is off, so a step never reserves 52px for a button nobody can see. */
+ function showNext(n, on, instant) {
+  var row = nextRows[n - 1]; if (!row) return;
+  var grew = on && row.hidden;
+  if (on) row.hidden = false;
+  if (instant) { gsap.set(row, { autoAlpha: on ? 1 : 0 }); if (!on) row.hidden = true; return; }
+  gsap.to(row, { autoAlpha: on ? 1 : 0, duration: D(0.2), overwrite: 'auto', onComplete: function () { if (!on) { row.hidden = true; if (n === state.step) fitSteps(); } } });
+  if (grew && n === state.step) fitSteps();
+ }
+ function updateRail(instant) {
+  var has = [!!state.service, !!state.size, !!state.town, state.sent];
+  segs.forEach(function (seg, i) {
+   var on = state.sent || i === state.step - 1 || has[i];
+   seg.classList.toggle('is-current', i === state.step - 1 && !state.sent);
+   gsap.to(fills[i], { scaleX: on ? 1 : 0, duration: instant ? 0 : D(0.5), ease: 'expo.out', overwrite: 'auto' });
+  });
+  var text = state.sent ? 'Done' : 'Step ' + state.step + ' of 4';
+  rail.setAttribute('aria-valuenow', state.sent ? 4 : state.step); rail.setAttribute('aria-valuetext', text); counter.textContent = text;
+ }
+ function revealChip(c) {
+  if (!c) return;
+  var l = c.offsetLeft, r = l + c.offsetWidth, sl = chipsBox.scrollLeft, w = chipsBox.clientWidth;
+  if (l < sl) chipsBox.scrollLeft = l; else if (r > sl + w) chipsBox.scrollLeft = r - w;
+ }
+ function updateChips(instant) {
+  var items = [];
+  if (state.service) { var s = radio('service', state.service); items.push({ step: 1, key: 'service:' + state.service, text: s.dataset.chip || s.dataset.label }); }
+  if (state.size) { var d = sizeData(state.size); items.push({ step: 2, key: 'size:' + state.size, text: d.chip || d.yd + ' yd' }); }
+  if (state.town) items.push({ step: 3, key: 'town:' + state.town, text: townData(state.town).chip });
+  if (state.date && state.dateSet) items.push({ step: 3, key: 'date:' + state.date, text: niceDate(state.date) });
+  chipsEmpty.hidden = items.length > 0;
+  var existing = {};
+  Array.prototype.slice.call(chipsBox.querySelectorAll('.chip')).forEach(function (c) { existing[c.dataset.key] = c; });
+  var fresh = [], current = null;
+  items.forEach(function (it) {
+   var b = existing[it.key];
+   if (b) { delete existing[it.key]; }
+   else {
+    b = doc.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.dataset.goto = it.step; b.dataset.key = it.key;
+    b.innerHTML = '<span class="sr" data-chip-sr></span>' + it.text + '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11.5 2.5l2 2L5 13H3v-2z"/></svg>';
+    fresh.push(b);
+   }
+   var cur = it.step === state.step && !state.sent;
+   b.classList.toggle('is-current', cur);
+   if (cur) { b.setAttribute('aria-current', 'step'); current = current || b; } else { b.removeAttribute('aria-current'); }
+   b.querySelector('[data-chip-sr]').textContent = cur ? 'Editing: ' : 'Change: ';
+   b.disabled = state.sent;
+   chipsBox.appendChild(b);
+  });
+  Object.keys(existing).forEach(function (k) { existing[k].remove(); });
+  if (fresh.length && !instant) gsap.from(fresh, { y: 8, autoAlpha: 0, scale: 0.96, duration: D(0.35), ease: 'back.out(1.6)', stagger: D(0.05), overwrite: 'auto' });
+  revealChip(current || fresh[fresh.length - 1]);
+ }
+ /* PRICE TBD, TERM TBD: placeholder numbers from the radios and a placeholder 7 day term. */
+ function updateEstimate(instant) {
+  var t = binType();
+  var d = state.size ? sizeData(state.size) : null;
+  var tbd = !!(d && d.tbd);
+  if (!d || tbd) d = sizeData(DEFAULT_PREVIEW[t]);
+  var town = state.town ? townData(state.town) : null;
+  var target = d.price + (town ? town.adj : 0);
+  var unit = t === 'fl' ? '/mo' : ' for 7 days';
+  priceLine.hidden = tbd; priceTbd.hidden = !tbd;
+  priceNote.textContent = tbd ? 'We size it with you.' : 'Final quote on the call.';
+  var key = tbd ? 'tbd' : target + unit;
+  if (key === lastPriceKey) return;
+  lastPriceKey = key;
+  priceUnit.textContent = unit;
+  priceSr.textContent = tbd ? 'Quote on the call.' : 'From $' + target + unit + '. Final quote on the call.';
+  if (tbd) return;
+  if (instant) { gsap.killTweensOf(price); price.v = target; priceEl.textContent = target; return; }
+  gsap.to(price, { v: target, duration: D(0.6), ease: 'power2.out', overwrite: true, onUpdate: function () { priceEl.textContent = Math.round(price.v); } });
+ }
+ /* Step 1 has no estimate: the slot collapses (hidden) so nothing sits between the chips and the question. It rides in the row above the steps inside the clipped box; the outgoing step is out of flow while it slides (goTo), so un-hiding the row here moves only the still-invisible incoming step, and on the way out it fades and collapses before that step shows. */
+ function showEstimate(instant) {
+  var on = state.step !== 1;
+  if (on) estimateEl.hidden = false;
+  if (instant || !motion) { gsap.killTweensOf(estimateEl); gsap.set(estimateEl, { autoAlpha: on ? 1 : 0 }); if (!on) estimateEl.hidden = true; return; }
+  if (on) gsap.to(estimateEl, { autoAlpha: 1, duration: 0.25, overwrite: 'auto' });
+  else gsap.to(estimateEl, { autoAlpha: 0, duration: 0.08, overwrite: 'auto', onComplete: function () { if (state.step === 1) estimateEl.hidden = true; } });
+ }
+ /* Height glide. The steps box clips to the active step's measured height (plus the estimate row) and tweens to it on every step change: the one layout property this page animates. Reduced motion sets it at once. All steps share the cell, so a hidden step still measures true. */
+ var fitTween = null;
+ function stepsHeight() {
+  var h = steps[state.step - 1].getBoundingClientRect().height;
+  if (state.step !== 1) h += estimateEl.getBoundingClientRect().height;
+  return Math.ceil(h);
+ }
+ function refreshST() { if (window.ScrollTrigger) ScrollTrigger.refresh(); }
+ function fitSteps(instant, tl) {
+  var h = stepsHeight();
+  if (fitTween && fitTween.isActive()) { if (fitTween.vars.height === h && !instant) return; fitTween.kill(); }
+  else if (parseFloat(stepsBox.style.height) === h) return;
+  fitTween = null;
+  if (instant || !motion) { gsap.set(stepsBox, { height: h }); refreshST(); return; }
+  fitTween = gsap.to(stepsBox, { height: h, duration: 0.38, ease: 'power3.out', onComplete: function () { fitTween = null; refreshST(); } });
+  if (tl) tl.add(fitTween, 0);
+ }
+
+ /* Step transition: outgoing slides one way, incoming from the other, under 500 ms. */
+ function goTo(n, opts) {
+  opts = opts || {};
+  n = Math.max(1, Math.min(4, parseInt(n, 10) || 1));
+  if (state.sent || sending) return;
+  cancelPending();
+  if (n === state.step) { if (opts.hint) hint(n, opts.hint); return; }
+  var from = state.step, dir = n > from ? 1 : -1;
+  var out = steps[from - 1], inn = steps[n - 1];
+  if (from === 3 && n === 4) state.dateSet = true;
+  state.step = n;
+  if (n === 2) syncSizeSet(true);
+  out.inert = true; out.setAttribute('aria-hidden', 'true');
+  inn.inert = false; inn.removeAttribute('aria-hidden');
+  steps.forEach(function (s, i) { if (i !== n - 1 && i !== from - 1) gsap.set(s, { autoAlpha: 0 }); });
+  showNext(n, !!stepValue(n), true);
+  if (rigStepHook) rigStepHook(n);
+  /* Phones get one screen per step, so every change scrolls the flow to the top. Pointers only when the sticky nav covers it. */
+  var navH = navEl ? navEl.offsetHeight : 64;
+  if (coarse || stepsBox.getBoundingClientRect().top < navH + 12) root.scrollIntoView({ block: 'start', behavior: motion ? 'smooth' : 'auto' });
+  if (moving) moving.kill();
+  /* The outgoing step leaves the grid flow for the slide, pinned where it already sits (measured before the estimate row changes), so that row appearing or collapsing cannot shove it. Cleared when the out tween completes, and for every step here, so a mid-slide kill cannot leave one stuck out of flow. */
+  steps.forEach(function (s) { s.classList.remove('is-out'); s.style.top = ''; });
+  out.style.top = (out.getBoundingClientRect().top - stepsBox.getBoundingClientRect().top) + 'px';
+  out.classList.add('is-out');
+  moving = gsap.timeline({ onComplete: function () { moving = null; } });
+  moving.to(out, { x: -24 * dir, autoAlpha: 0, duration: D(0.22), ease: 'power4.out', overwrite: 'auto', onComplete: function () { out.classList.remove('is-out'); out.style.top = ''; } })
+     .fromTo(inn, { x: 24 * dir, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: D(0.38), ease: 'expo.out', overwrite: 'auto' }, D(0.1));
+  updateRail(); updateChips(); updateEstimate(); showEstimate();
+  hint(n, opts.hint || '');
+  /* measured now, while the incoming step is still invisible in the shared cell; the box glides in step with the slide */
+  fitSteps(false, moving);
+  announce.textContent = 'Step ' + n + ' of 4.';
+  var focusTarget = opts.focus || inn.querySelector('.q');
+  gsap.delayedCall(motion ? 0.14 : 0.05, function () { focusTarget.focus({ preventScroll: true }); });
+ }
+ function next3() {
+  if (!dateEl.value || dateEl.value < dateEl.min) { hint(3, 'Pick a day.'); dateEl.focus(); return; }
+  if (!state.town) { hint(3, 'Pick a town.'); form.querySelector('input[name="town"]').focus(); return; }
+  state.date = dateEl.value; state.dateSet = true;
+  goTo(4, { focus: coarse ? null : nameEl });
+ }
+ function advanceFrom(n) {
+  if (n === 1) { if (!state.service) { hint(1, 'Pick what the bin is for.'); return; } goTo(state.service === 'other' ? 3 : 2); }
+  else if (n === 2) { if (!state.size) { hint(2, 'Pick a size.'); return; } goTo(3); }
+  else if (n === 3) next3();
+ }
+ function pick(inp, advance) {
+  if (state.sent || sending) return;
+  var name = inp.name;
+  hint(state.step, '');
+  if (name === 'service') {
+   state.service = inp.value;
+   if (autoTbd && inp.value !== 'other') { var old = checkedRadio('size'); if (old && old.hasAttribute('data-tbd')) old.checked = false; state.size = null; autoTbd = false; }
+   syncSizeSet(true);
+   if (inp.value === 'other' && !state.size) { var tb = radio('size', TBD_SIZE.ro); tb.checked = true; state.size = tb.value; autoTbd = true; }
+  }
+  else if (name === 'size') { state.size = inp.value; autoTbd = false; morph(inp.value); }
+  else if (name === 'town') { state.town = inp.value; }
+  pop(labelFor(inp));
+  updateRail(); updateChips(); updateEstimate();
+  if (!advance) { showNext(state.step, !!stepValue(state.step)); return; }
+  /* the service step waits a beat longer so the yellow snap reads before the slide */
+  if (name === 'service') schedule(D(0.45), function () { goTo(state.service === 'other' ? 3 : 2); });
+  else if (name === 'size') schedule(D(0.7), function () { goTo(3); });
+  else if (name === 'town') schedule(D(0.3), next3);
+ }
+ function recapText() {
+  var d = sizeData(state.size);
+  return radio('service', state.service).dataset.label + ', ' + (d.tbd ? 'size on the call' : d.yd + ' yard') + ', ' + townData(state.town).recap + ', ' + niceDate(state.date).replace(',', '') + '.';
+ }
+ function showDone() {
+  /* Navigation is frozen while sending; this guard lands the card on step 4 even if something slipped past. */
+  if (state.step !== 4) {
+   cancelPending(); if (moving) { moving.kill(); moving = null; }
+   state.step = 4;
+   steps.forEach(function (s, i) { var on = i === 3; s.inert = !on; if (on) s.removeAttribute('aria-hidden'); else s.setAttribute('aria-hidden', 'true'); s.classList.remove('is-out'); s.style.top = ''; gsap.set(s, { autoAlpha: on ? 1 : 0, x: 0 }); });
+   showEstimate(true); fitSteps(true);
+  }
+  state.sent = true;
+  var top = steps[3].querySelector('.step-top'), back = steps[3].querySelector('[data-back]'), q = steps[3].querySelector('.q');
+  gsap.to([fieldsBox, top], { autoAlpha: 0, y: -8, duration: D(0.2), ease: 'power2.in', overwrite: 'auto', onComplete: function () {
+   fieldsBox.hidden = true; back.hidden = true; back.disabled = true;
+   var first = firstName(state.name);
+   q.textContent = first ? 'Got it, ' + first + '.' : 'Got it.';
+   var card = tpl.content.firstElementChild.cloneNode(true);
+   card.querySelector('[data-recap]').textContent = recapText();
+   doneSlot.appendChild(card);
+   gsap.fromTo(top, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: D(0.5), ease: 'expo.out', overwrite: 'auto' });
+   gsap.from(card.querySelectorAll('[data-anim]'), { y: 16, autoAlpha: 0, duration: D(0.5), ease: 'expo.out', stagger: D(0.07), delay: D(0.07) });
+   card.focus({ preventScroll: true });
+   announce.textContent = 'Got it. A human calls you back within the hour.';
+   updateRail(); updateChips(true); showEstimate(); fitSteps();
+  } });
+ }
+ function setBusy(on) {
+  sending = on;
+  if (on) submitBtn.style.minWidth = submitBtn.offsetWidth + 'px';
+  submitBtn.disabled = on;
+  if (on) submitBtn.setAttribute('aria-busy', 'true'); else submitBtn.removeAttribute('aria-busy');
+  submitBtn.textContent = on ? 'Sending' : submitLabel;
+  /* the whole flow reads as locked while the request is out: no Back, no chip jumps */
+  Array.prototype.slice.call(chipsBox.querySelectorAll('.chip')).forEach(function (c) { c.disabled = on || state.sent; });
+  steps[3].querySelector('[data-back]').disabled = on || state.sent;
+ }
+ /* POST with an 8 s ceiling; rejects on timeout, network error or non-2xx so the submit handler can offer a retry. */
+ function send(payload) {
+  if (SIMULATE) return new Promise(function (res) { setTimeout(res, 500); });
+  return new Promise(function (res, rej) {
+   var timer = setTimeout(function () { rej(new Error('timeout')); }, 8000);
+   fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    .then(function (r) { clearTimeout(timer); if (r.ok) res(); else rej(new Error('HTTP ' + r.status)); }, function (err) { clearTimeout(timer); rej(err); });
+  });
+ }
+
+ /* ---------- Boot ---------- */
+ form.noValidate = true;
+ scene.setAttribute('viewBox', '0 0 600 168');
+ gsap.set(bins.ro, { transformOrigin: '50% 100%' });
+ gsap.set(bins.fl, { x: FL_X, autoAlpha: 0, transformOrigin: '50% 100%' });
+ steps.forEach(function (s, i) { if (i) { gsap.set(s, { autoAlpha: 0 }); s.inert = true; s.setAttribute('aria-hidden', 'true'); } });
+ var today = new Date();
+ dateEl.min = iso(today);
+ if (!dateEl.value) dateEl.value = iso(nextWeekday(today));
+ state.date = dateEl.value;
+ ['service', 'size', 'town'].forEach(function (n) { var c = checkedRadio(n); if (c) state[n] = c.value; });
+ state.name = nameEl.value; state.phone = phoneEl.value;
+ function bootFlow() {
+  syncSizeSet(true);
+  updateRail(true); updateChips(true); updateEstimate(true); showEstimate(true);
+  steps.forEach(function (s, i) { showNext(i + 1, !!stepValue(i + 1), true); });
+  fitSteps(true);
+ }
+ bootFlow();
+ /* Keep the clip honest: resize sets the height at once (one measure per frame); ResizeObserver catches the rest (fonts landing, a hint wrapping, the side view retiring at 1000px). */
+ var fitRaf = 0;
+ window.addEventListener('resize', function () { if (fitRaf) return; fitRaf = requestAnimationFrame(function () { fitRaf = 0; fitSteps(true); }); });
+ if ('ResizeObserver' in window) { var fitRo = new ResizeObserver(function () { fitSteps(); }); steps.concat([estimateEl]).forEach(function (el) { fitRo.observe(el); }); }
+
+ /* ---------- Events ---------- */
+ form.addEventListener('click', function (e) {
+  var lab = e.target.closest('label[for]');
+  if (lab) {
+   var inp = doc.getElementById(lab.htmlFor);
+   if (inp && inp.type === 'radio') {
+    var adv = lab.hasAttribute('data-advance');
+    if (inp.checked) { pick(inp, adv); }
+    else if (adv) { advanceIntent = inp.id; setTimeout(function () { if (advanceIntent === inp.id) advanceIntent = null; }, 150); }
+   }
+   return;
+  }
+  /* Back mirrors the forward skip: the Something else path never saw the size step */
+  if (e.target.closest('[data-back]')) { goTo(state.step === 3 && state.service === 'other' && autoTbd ? 1 : state.step - 1); return; }
+  if (e.target.closest('[data-next]')) { advanceFrom(state.step); return; }
+  var chip = e.target.closest('[data-goto]');
+  if (chip && !chip.disabled) goTo(chip.dataset.goto);
+ });
+ form.addEventListener('change', function (e) {
+  var t = e.target;
+  if (t.type === 'radio') { var adv = advanceIntent === t.id; advanceIntent = null; pick(t, adv); return; }
+  if (t === dateEl) { state.date = t.value; state.dateSet = true; hint(3, ''); updateChips(); }
+ });
+ form.addEventListener('input', function (e) {
+  if (e.target === nameEl) state.name = e.target.value;
+  if (e.target === phoneEl) state.phone = e.target.value;
+  if (e.target === nameEl || e.target === phoneEl) e.target.removeAttribute('aria-invalid');
+ });
+ form.addEventListener('keydown', function (e) {
+  var t = e.target;
+  if (t.type === 'radio') {
+   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!t.checked) t.checked = true; pick(t, e.key === 'Enter' || labelFor(t).hasAttribute('data-advance')); }
+   return;
+  }
+  if (e.key === 'Enter' && t === dateEl) { e.preventDefault(); next3(); }
+ });
+ form.addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (state.sent || sending) return;
+  if (!state.service) { goTo(1, { hint: 'Pick what the bin is for.' }); return; }
+  if (!state.size) { goTo(2, { hint: 'Pick a size.' }); return; }
+  if (!state.town) { goTo(3, { hint: 'Pick a town.' }); return; }
+  state.name = nameEl.value.trim(); state.phone = phoneEl.value.replace(/\D/g, '');
+  nameEl.removeAttribute('aria-invalid'); phoneEl.removeAttribute('aria-invalid');
+  if (!state.name) { hint(4, 'Enter your name.'); nameEl.setAttribute('aria-invalid', 'true'); nameEl.focus(); return; }
+  if (state.phone.length < 10) { hint(4, 'Enter a 10 digit phone.'); phoneEl.setAttribute('aria-invalid', 'true'); phoneEl.focus(); return; }
+  hint(4, '');
+  setBusy(true);
+  var payload = { service: state.service, size: state.size, town: state.town, date: state.date, name: state.name, phone: state.phone };
+  send(payload).then(function () { sending = false; showDone(); }, function () {
+   setBusy(false);
+   hint(4, '', 'Didn\'t send. <a href="' + TEL_HREF + '">Call ' + TEL + '</a> or try again.');
+   submitBtn.focus({ preventScroll: true });
+  });
+ });
+
+ /* Hover extra: hovering a size tile previews it in both visualizers. */
+ mm.add('(hover: hover) and (pointer: fine)', function () {
+  var over = function (e) {
+   var lab = e.target.closest('label[for]'); if (!lab) return;
+   var inp = doc.getElementById(lab.htmlFor);
+   if (inp && inp.name === 'size' && inp.value !== state.size) morph(inp.value);
+  };
+  var leave = function () { morph(sizeToShow()); };
+  sizesWrap.addEventListener('mouseover', over);
+  sizesWrap.addEventListener('mouseleave', leave);
+  return function () { sizesWrap.removeEventListener('mouseover', over); sizesWrap.removeEventListener('mouseleave', leave); };
+ });
+
+ /* Flow entrance: rail segments, chips row, then the current step's parts. Nested into the hero timeline. */
+ function flowEnter() {
+  var parts = steps[state.step - 1].querySelectorAll('[data-anim]');
+  return gsap.timeline({ defaults: { ease: 'expo.out' } })
+   .from(segs, { scaleX: 0, transformOrigin: '0 50%', duration: 0.6, stagger: 0.06 })
+   .from(chipsBox, { y: 8, autoAlpha: 0, duration: 0.4 }, '-=0.4')
+   .from(parts, { y: 24, autoAlpha: 0, duration: 0.6, stagger: 0.07 }, '-=0.35');
+ }
+
+ /* Public API for deep links: services tiles, town map, nav. */
+ function scrollToFlow() { root.scrollIntoView({ behavior: motion ? 'smooth' : 'auto', block: 'start' }); }
+ function preselect(value, opts) {
+  opts = opts || {};
+  if (state.sent || sending) return false;
+  var v = String(value || '').trim().toLowerCase(), inp = null;
+  var all = form.querySelectorAll('input[name="service"], input[name="town"]');
+  for (var i = 0; i < all.length; i++) { if (all[i].value === v || (all[i].dataset.label || '').toLowerCase() === v) { inp = all[i]; break; } }
+  if (!inp) return false;
+  inp.checked = true;
+  pick(inp, false);
+  goTo(inp.name === 'service' ? (inp.value === 'other' ? 3 : 2) : (state.service ? (state.size ? 3 : 2) : 1));
+  if (opts.scroll !== false) scrollToFlow();
+  return true;
+ }
+ window.YWSFlow = { preselect: preselect, goTo: function (n) { goTo(n); }, get state() { return Object.assign({}, state); } };
+
+ /* ===================== 3D RIG: idle yaw, lid pop, size morph (desktop). Dimmed and still on step 1. ===================== */
+ mm.add('(min-width: 1000px)', function () {
+  var viz = doc.getElementById('rig'), rigEl = doc.getElementById('dragyaw'), box = doc.getElementById('box');
+  var stagewrap = doc.querySelector('.hero-stagewrap'), lid = doc.querySelector('.face--lid'), decal = doc.querySelector('[data-rig-decal]');
+  if (!viz || !rigEl || !box || !stagewrap) return;
+  gsap.set(rigEl, { rotationY: -22 });
+  var idle = null, rigVisible = true, rigAwake = state.step > 1, rigST = null;
+  function syncIdle() { if (idle) { if (rigVisible && rigAwake) idle.play(); else idle.pause(); } }
+  function startIdle() {
+   if (idle) idle.kill();
+   if (!motion) { idle = null; return; }
+   idle = gsap.to(rigEl, { rotationY: '+=360', duration: 56, ease: 'none', repeat: -1 });
+   syncIdle();
+  }
+  if (window.ScrollTrigger) {
+   rigST = ScrollTrigger.create({ trigger: viz, start: 'top bottom', end: 'bottom top', onToggle: function (st) { rigVisible = st.isActive; syncIdle(); } });
+  }
+  startIdle();
+
+  /* Step gate: nothing competes with the first question. The rig sits dimmed and still on step 1 and wakes with a yaw kick on step 2. */
+  rigStepHook = function (step, instant) {
+   var awake = step > 1;
+   if (instant) gsap.set(stagewrap, { autoAlpha: awake ? 1 : 0.45 });
+   else gsap.to(stagewrap, { autoAlpha: awake ? 1 : 0.45, duration: D(0.5), ease: 'power2.out', overwrite: 'auto' });
+   if (awake === rigAwake) return;
+   rigAwake = awake;
+   if (awake && !instant && motion) {
+    if (idle) { idle.kill(); idle = null; }
+    gsap.to(rigEl, { rotationY: '+=28', duration: 0.9, ease: 'back.out(1.4)', overwrite: 'auto', onComplete: startIdle });
+   } else syncIdle();
+  };
+  rigStepHook(state.step, true);
+
+  /* Absolute scale against the roll-off model (22 ft long, 6 ft tall), so a 2 yard front-load reads as a small box, not a 30 yard one.
+     Width and height change, depth stays. The decal hides once the box is too narrow to carry it. */
+  var RIG_BASE = { L: 22, H: 6 };
+  function rigScale(d) { var p = d.dims.split('x').map(parseFloat); return { sx: Math.max(0.3, p[0] / RIG_BASE.L), sy: p[2] / RIG_BASE.H }; }
+  var lastKey = '';
+  rigHook = function (d, picked, instant) {
+   var key = d.key + (picked ? '!' : '');
+   if (key === lastKey) return;
+   var changed = lastKey.split('!')[0] !== d.key;
+   lastKey = key;
+   var s = rigScale(d);
+   gsap.to(box, { scaleX: s.sx, scaleY: s.sy, duration: instant ? 0 : D(0.8), ease: 'elastic.out(1, 0.55)', overwrite: 'auto' });
+   if (decal) gsap.to(decal, { autoAlpha: s.sx < 0.45 ? 0 : 1, duration: instant ? 0 : D(0.25), overwrite: 'auto' });
+   if (!instant && changed && motion && rigAwake) {
+    if (idle) { idle.kill(); idle = null; }
+    gsap.to(rigEl, { rotationY: '+=' + (picked ? 42 : 18), duration: 0.9, ease: 'back.out(1.4)', overwrite: 'auto', onComplete: startIdle });
+   }
+  };
+  var cur = sizeData(sizeToShow());
+  if (cur) rigHook(cur, cur.key === state.size, true);
+
+  var lidState = { a: 90 };
+  function setLid() { if (lid) lid.style.setProperty('--lid', lidState.a + 'deg'); }
+  var canHover = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  function lidOpen() { gsap.to(lidState, { a: 118, duration: D(0.5), ease: 'power3.out', onUpdate: setLid, overwrite: true }); }
+  function lidShut() { gsap.to(lidState, { a: 90, duration: D(0.45), ease: 'power3.out', onUpdate: setLid, overwrite: true }); }
+  if (lid && canHover) { viz.addEventListener('pointerenter', lidOpen); viz.addEventListener('pointerleave', lidShut); }
+  return function () {
+   rigHook = null; rigStepHook = null;
+   if (lid && canHover) { viz.removeEventListener('pointerenter', lidOpen); viz.removeEventListener('pointerleave', lidShut); }
+   if (idle) idle.kill();
+   if (rigST) rigST.kill();
+   gsap.killTweensOf([rigEl, box, stagewrap, decal]);
+   gsap.set([rigEl, box], { clearProps: 'transform' });
+   gsap.set([stagewrap, decal], { clearProps: 'opacity,visibility' });
+   if (lid) lid.style.removeProperty('--lid');
+  };
+ });
+
+ /* ===================== PAGE: services, towns, quote, nav, mini bar ===================== */
+ /* Services: expand on tap (hover is CSS); Start here preselects the service in the flow.
+    Touch layouts (900px and under) keep every card open, so the head only pops and aria-expanded stays true. */
+ var svcs = Array.prototype.slice.call(doc.querySelectorAll('[data-svc]'));
+ var svcOpenAll = window.matchMedia('(max-width: 900px)');
+ function openSvc(target, on) {
+  svcs.forEach(function (s) {
+   var is = s === target && on;
+   s.classList.toggle('is-open', is);
+   s.querySelector('.svc-head').setAttribute('aria-expanded', String(svcOpenAll.matches || is));
+  });
+ }
+ openSvc(null, false);
+ if (svcOpenAll.addEventListener) svcOpenAll.addEventListener('change', function () { openSvc(null, false); });
+ doc.addEventListener('click', function (e) {
+  var start = e.target.closest('[data-start]');
+  if (start) { pop(start.closest('[data-svc]')); preselect(start.dataset.start); return; }
+  var head = e.target.closest('.svc-head');
+  if (head) { var s = head.closest('[data-svc]'); pop(s); if (!svcOpenAll.matches) openSvc(s, !s.classList.contains('is-open')); return; }
+  var chipT = e.target.closest('.tchip');
+  if (chipT) { setTown(chipT.dataset.town); pop(chipT); preselect(chipT.dataset.town); return; }
+  var mapT = e.target.closest('.tn');
+  if (mapT) { setTown(mapT.dataset.town); preselect(mapT.dataset.town); return; }
+  var sizesLink = e.target.closest('[data-sizes-link]');
+  if (sizesLink) { e.preventDefault(); goTo(2); scrollToFlow(); var menu = sizesLink.closest('.nav-menu'); if (menu) menu.removeAttribute('open'); return; }
+  var mini = e.target.closest('[data-minibar-book]');
+  if (mini) { e.preventDefault(); scrollToFlow(); return; }
+  var navMenu = e.target.closest('.nav-menu');
+  if (navMenu && e.target.closest('a')) navMenu.removeAttribute('open');
+ });
+ doc.addEventListener('keydown', function (e) {
+  var t = e.target.closest && e.target.closest('.tn');
+  if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); t.click(); }
+ });
+
+ /* Towns: hover or focus highlights the map node and the chip together. */
+ var townNodes = Array.prototype.slice.call(doc.querySelectorAll('.tn, .tchip'));
+ function setTown(key) { townNodes.forEach(function (n) { n.classList.toggle('is-hi', n.dataset.town === key); }); }
+ setTown('prescott');
+ ['mouseover', 'focusin'].forEach(function (ev) {
+  doc.addEventListener(ev, function (e) {
+   var n = e.target.closest && e.target.closest('.tn, .tchip');
+   if (n) { setTown(n.dataset.town); if (ev === 'mouseover' && motion && n.classList.contains('tchip')) { gsap.killTweensOf(n); gsap.to(n, { scale: 1.04, duration: 0.3, ease: 'back.out(2)', overwrite: 'auto' }); } }
+  });
+ });
+ doc.addEventListener('mouseout', function (e) {
+  var n = e.target.closest && e.target.closest('.tchip');
+  if (n && motion) gsap.to(n, { scale: 1, duration: 0.25, ease: 'power2.out', overwrite: 'auto' });
+ });
+
+ /* One rotating quote. PLACEHOLDER EXAMPLES, invented for the mockup; replace with verbatim quotes before any showing. */
+ var QUOTES = [
+  { q: 'Bin was in the driveway by 8am. Gone before the weekend.', n: 'Mike', t: 'Prescott Valley' },
+  { q: 'A human answered on the first ring.', n: 'Carla', t: 'Chino Valley' },
+  { q: 'Swapped our remodel bin same day. No surprise upcharge.', n: 'Dan', t: 'Williamson Valley' },
+  { q: 'Front-load pickup every Tuesday like clockwork. Two years now.', n: 'Rosa', t: 'Prescott' }
+ ];
+ var qBox = doc.querySelector('[data-quote]'), qEl = doc.querySelector('[data-q]'), cEl = doc.querySelector('[data-c]');
+ var qi = 0, qTimer = null, qPaused = false, qInView = true;
+ function renderQuote(i) { qEl.innerHTML = '&ldquo;' + QUOTES[i].q + '&rdquo;'; cEl.innerHTML = '<b>' + QUOTES[i].n + '</b> &middot; ' + QUOTES[i].t; }
+ function showQuote(i, dir) {
+  qi = (i + QUOTES.length) % QUOTES.length;
+  var targets = [qEl, cEl];
+  gsap.killTweensOf(targets);
+  gsap.timeline()
+   .to(targets, { y: -10 * dir, autoAlpha: 0, duration: D(0.22), ease: 'power2.in', stagger: D(0.03) })
+   .call(function () { renderQuote(qi); })
+   .fromTo(targets, { y: 12 * dir, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: D(0.45), ease: 'expo.out', stagger: D(0.05) });
+  armQuote();
+ }
+ function armQuote() {
+  if (qTimer) qTimer.kill();
+  if (!motion) return;
+  qTimer = gsap.delayedCall(6.5, function () { if (!qPaused && qInView) showQuote(qi + 1, 1); else armQuote(); });
+ }
+ if (qBox) {
+  qBox.addEventListener('click', function (e) {
+   if (e.target.closest('[data-quote-next]')) showQuote(qi + 1, 1);
+   else if (e.target.closest('[data-quote-prev]')) showQuote(qi - 1, -1);
+  });
+  qBox.addEventListener('mouseenter', function () { qPaused = true; });
+  qBox.addEventListener('mouseleave', function () { qPaused = false; });
+  qBox.addEventListener('focusin', function () { qPaused = true; });
+  qBox.addEventListener('focusout', function () { qPaused = false; });
+  if (window.ScrollTrigger) ScrollTrigger.create({ trigger: qBox, start: 'top bottom', end: 'bottom top', onToggle: function (st) { qInView = st.isActive; } });
+  armQuote();
+ }
+
+ /* Sticky mini bar: in once the hero has scrolled away, out when it comes back. */
+ var bar = doc.querySelector('[data-minibar]'), heroEl = doc.querySelector('.hero');
+ if (bar && heroEl && window.ScrollTrigger) {
+  ScrollTrigger.create({ trigger: heroEl, start: 'bottom 90px', end: 'max', onToggle: function (st) { bar.classList.toggle('is-on', st.isActive); } });
+ }
+
+ /* ===================== ENTRANCES: one hero timeline, batched section reveals ===================== */
+ var fontsReady = ('fonts' in doc) ? doc.fonts.ready : Promise.resolve();
+ var fontsSettled = Promise.race([fontsReady, new Promise(function (r) { setTimeout(r, 600); })]);
+ mm.add('(prefers-reduced-motion: no-preference)', function () {
+  gsap.set('.hero-title .line', { yPercent: 112 });
+  var hero = gsap.timeline({ paused: true, defaults: { ease: 'power4.out', duration: 0.9 } })
+   .to('.hero-title .line', { yPercent: 0, duration: 0.85, stagger: 0.1 }, 0.1)
+   .from('.hero-sub', { y: 20, autoAlpha: 0, duration: 0.6 }, '-=0.55')
+   .from('.flow', { y: 28, autoAlpha: 0, duration: 0.7, ease: 'expo.out' }, '-=0.45')
+   .add(flowEnter(), '-=0.35')
+   .from('.hero-stagewrap', { autoAlpha: 0, x: 24, duration: 1.1, ease: 'expo.out' }, 0.3);
+  fontsSettled.then(function () { hero.play(); if (window.ScrollTrigger) ScrollTrigger.refresh(); });
+
+  var rv = gsap.utils.toArray('.rv');
+  gsap.set(rv, { autoAlpha: 0, y: 28 });
+  if (window.ScrollTrigger) {
+   ScrollTrigger.batch(rv, { start: 'top 88%', once: true, onEnter: function (batch) { gsap.to(batch, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.08, overwrite: true }); } });
+  } else { gsap.to(rv, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.08 }); }
+  return function () {
+   hero.kill();
+   gsap.set(['.hero-title .line', '.hero-sub', '.flow', '.hero-stagewrap', rv], { clearProps: 'all' });
+   gsap.set([].concat(segs, [chipsBox], Array.prototype.slice.call(steps[state.step - 1].querySelectorAll('[data-anim]'))), { clearProps: 'transform,opacity,visibility' });
+   if (rigStepHook) rigStepHook(state.step, true);
+  };
+ });
+ fontsReady.then(function () { fitSteps(true); if (window.ScrollTrigger) ScrollTrigger.refresh(); });
+})();
+</script>
+
+</body>
+</html>
