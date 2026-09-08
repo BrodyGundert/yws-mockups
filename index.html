@@ -22,7 +22,7 @@
   .eyebrow{font:600 12px/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
   h1{margin:0;font:800 clamp(32px,5vw,52px)/1.05 var(--font-display);letter-spacing:-.01em;text-wrap:balance}
   .lede{margin:0;max-width:60ch;color:var(--muted)}
-  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
   @media (max-width:820px){.grid{grid-template-columns:1fr}}
   .dir{display:grid;grid-template-rows:auto 1fr auto;background:var(--card);border:1px solid var(--hair);border-radius:var(--r);overflow:hidden;text-decoration:none;color:inherit;transition:transform .2s ease,box-shadow .2s ease}
   .dir:hover,.dir:focus-visible{transform:translateY(-3px);box-shadow:0 14px 30px rgba(21,23,26,.12)}
@@ -31,6 +31,7 @@
   .swatch.a{background:var(--yellow);color:var(--ink)}
   .swatch.b{background:linear-gradient(180deg,#3c2f4c 0%,#e8734a 100%);color:#f5f1e8}
   .swatch.c{background:var(--charcoal);color:var(--yellow)}
+  .swatch.a2{background:#e4e4e4;color:var(--ink);border-bottom:1px solid var(--hair)}
   .body{padding:18px 20px 8px;display:grid;gap:8px;align-content:start}
   .body h2{margin:0;font:800 22px/1.15 var(--font-display)}
   .body p{margin:0;color:var(--muted);font-size:15px}
@@ -47,7 +48,7 @@
   <header>
     <span class="eyebrow">Yavapai Waste Solutions</span>
     <h1>Three ways to talk trash.</h1>
-    <p class="lede">Same booking app in three personalities. Open one on your phone, tap through Get a Bin, and pick the one that feels like YWS.</p>
+    <p class="lede">Same booking app in three personalities, plus a monochrome revision of Direction A. Open one on your phone, tap through Get a Bin, and pick the one that feels like YWS.</p>
   </header>
 
   <div class="grid">
@@ -58,6 +59,14 @@
         <p>Safety-yellow poster energy. Big type, caution stripes, loud and local.</p>
       </div>
       <div class="foot"><span class="tag">Direction A</span><span class="open">Open</span></div>
+    </a>
+    <a class="dir" href="a-mono.html">
+      <div class="swatch a2">MONO</div>
+      <div class="body">
+        <h2>Direction A, Monochrome</h2>
+        <p>Same poster energy in black, white and grey. Revised after feedback: no competitor colors, matches the logo.</p>
+      </div>
+      <div class="foot"><span class="tag">Direction A, revised</span><span class="open">Open</span></div>
     </a>
     <a class="dir" href="b.html">
       <div class="swatch b">LONG HAUL</div>
@@ -78,7 +87,7 @@
   </div>
 
   <section class="shared">
-    <h3>What all three share</h3>
+    <h3>What they all share</h3>
     <ul>
       <li><b>Get a Bin in four taps:</b> what for, what size, where and when, who to call.</li>
       <li><b>No walls of text.</b> Services, trust, one quote, service area, done.</li>
