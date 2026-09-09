@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrashLab frame test</title>
+<style>
+  body{margin:0;font:14px system-ui;background:#f4f4f4}
+  .bar{padding:10px 14px;background:#111;color:#fff}
+  iframe{display:block;width:100%;height:calc(100vh - 40px);border:0;background:#fff}
+</style>
+</head>
+<body>
+<div class="bar">Frame test: if the shop renders below, embedding is allowed. <span id="s">loading</span></div>
+<iframe id="f" src="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" title="TrashLab shop"></iframe>
+<script>
+  const f = document.getElementById('f'), s = document.getElementById('s');
+  f.addEventListener('load', () => { s.textContent = 'iframe load event fired at ' + new Date().toLocaleTimeString(); });
+</script>
+</body>
+</html>
