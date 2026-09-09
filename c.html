@@ -120,7 +120,7 @@ main:focus{outline:0}
  .nav-links .btn.sm{padding:0 12px}.nav-menu summary{padding:0 12px}.brand svg{width:28px;height:22px}
  .nav-links .btn.sm,.nav-menu summary{font-size:13px;letter-spacing:var(--ls-ui)}
 }
-/* 320px class phones: the flow is one swipe down and the mini bar carries Get a Bin, so the nav keeps Call and Menu */
+/* 320px class phones: the flow is one swipe down and the mini bar carries Book Online, so the nav keeps Call and Menu */
 @media (max-width:359px){.nav-links .btn.sm{display:none}}
 
 /* ============================================================ HERO */
@@ -188,6 +188,10 @@ main:focus{outline:0}
 .chips{position:relative;display:flex;flex-wrap:nowrap;align-items:center;gap:8px;min-height:calc(var(--tap) + 12px);padding:6px;margin:-6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chips-empty{margin:0;font-family:var(--mono);font-size:var(--t-ui);letter-spacing:var(--ls-ui);color:var(--steel);text-transform:uppercase}
+/* one line under the chips: the TrashLab shortcut for people who already know what they want. The link's hit area is padded to 44px without growing the line. */
+.flow-book{margin:0;font-family:var(--mono);font-size:var(--t-ui);letter-spacing:.05em;color:var(--steel)}
+.flow-book a{position:relative;color:var(--yl);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.flow-book a::before{content:"";position:absolute;inset:-12px -6px}
 .chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:var(--tap);padding:0 14px;border:1px solid var(--hair-hi);border-radius:2px;background:var(--panel);color:var(--ink);font-family:var(--mono);font-size:var(--t-ui);font-weight:700;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;cursor:pointer}
 .chip svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
 .chip.is-current{background:var(--yl);border-color:var(--yl);color:var(--yl-ink)}
@@ -254,6 +258,8 @@ main:focus{outline:0}
 .spec .dims{font-size:var(--t-ui);letter-spacing:var(--ls-ui);color:var(--steel)}
 .spec .fits{font-size:var(--t-ui);letter-spacing:var(--ls-ui);font-weight:700;margin-left:auto;text-transform:uppercase}
 .sizes{display:flex;flex-direction:column;gap:12px}
+/* roll-off only: a secondary way out of the size step straight into the TrashLab shop */
+.size-book{display:flex;margin:12px 0 0}
 .when{display:block}
 @media (min-width:640px){.when{max-width:240px}}
 .when .label,.field .label{margin-bottom:4px}
@@ -352,9 +358,11 @@ main:focus{outline:0}
 .foot-base b{color:var(--yl);font-weight:700}
 @media (max-width:900px){.foot-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:520px){.foot-grid{grid-template-columns:1fr}}
-.minibar{position:fixed;left:0;right:0;bottom:0;z-index:90;display:flex;align-items:center;justify-content:center;gap:12px;padding:10px var(--s2);padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(33,35,39,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--hair-hi);transform:translateY(110%)}
+/* fixed, so it reads --tlb-gutter (set by the modal's scroll lock) and stays put when the scrollbar goes */
+.minibar{position:fixed;left:0;right:0;bottom:0;z-index:90;display:flex;align-items:center;justify-content:center;gap:12px;padding:10px var(--s2);padding-right:calc(var(--s2) + var(--tlb-gutter,0px));padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(33,35,39,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--hair-hi);transform:translateY(110%)}
 .minibar.is-on{transform:none}
 .minibar .tel{display:inline-flex;align-items:center;min-height:var(--tap);padding:0 12px;font-family:var(--mono);font-weight:700;font-size:var(--t-btn);letter-spacing:var(--ls-ui);color:var(--yl);text-decoration:none;font-variant-numeric:tabular-nums}
+@media (max-width:600px){.minibar .btn.sm{padding:0 12px;font-size:13px;letter-spacing:var(--ls-ui)}}
 
 /* transitions: transform and opacity only, and only when motion is welcome */
 @media (prefers-reduced-motion:no-preference){
@@ -366,6 +374,46 @@ main:focus{outline:0}
  .tn{transition:transform .3s cubic-bezier(.2,.9,.3,1.3)}
  .minibar{transition:transform .38s cubic-bezier(.2,.9,.3,1.1)}
 }
+
+/* ============================================================ TRASHLAB BOOK ONLINE (window.TrashLabBook) */
+/* The TrashLab shop framed on this page: .tlb (root) > .tlb-overlay + .tlb-dialog. Chrome is this direction's
+   gunmetal and yellow lip. Only transform and opacity animate. Without JS every Book Online link opens the shop
+   in a new tab and this markup stays hidden. z 1000 sits above the nav (100), the skip link (200) and the mini bar (90). */
+.tlb{--modal-w:1050px;--modal-h:820px;--modal-gap:16px;--modal-head-h:56px;position:fixed;inset:0;z-index:1000;display:grid;place-items:center;overscroll-behavior:contain}
+.tlb-overlay{position:absolute;inset:0;background:rgba(0,0,0,.72);touch-action:none}
+.tlb-dialog{position:relative;display:flex;flex-direction:column;overflow:hidden;outline:0;width:min(100vw - var(--modal-gap) * 2,var(--modal-w));height:min(100vh - var(--modal-gap) * 2,var(--modal-h));height:min(100dvh - var(--modal-gap) * 2,var(--modal-h));background:var(--bg);color:var(--ink);border:1px solid var(--hair-hi);border-top:3px solid var(--yl);border-radius:2px;box-shadow:0 24px 64px rgba(0,0,0,.6);will-change:transform,opacity}
+.tlb-head{display:flex;align-items:center;gap:12px;flex:none;height:var(--modal-head-h);padding:0 6px 0 var(--s2);background:var(--panel-2);border-bottom:1px solid var(--hair-hi)}
+.tlb-wordmark{flex:none;display:inline-flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:800;font-size:24px;letter-spacing:var(--ls-tight);line-height:1;color:var(--ink)}
+.tlb-wordmark svg{width:28px;height:22px}
+.tlb-title{flex:0 1 auto;min-width:0;margin:0 auto 0 0;padding-left:12px;border-left:1px solid var(--hair-hi);font-family:var(--mono);font-size:var(--t-ui);font-weight:700;letter-spacing:var(--ls-label);text-transform:uppercase;line-height:1.2;color:var(--steel);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tlb-newtab{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:var(--tap);padding:0 12px;border-radius:2px;color:var(--yl);font-family:var(--mono);font-size:var(--t-label);font-weight:700;letter-spacing:var(--ls-label);text-transform:uppercase;text-decoration:none;white-space:nowrap}
+.tlb-newtab svg{width:14px;height:14px}
+.tlb-newtab-short{display:none}
+.tlb-close{flex:none;width:var(--tap);height:var(--tap);display:grid;place-items:center;padding:0;border:0;border-radius:2px;background:transparent;color:var(--ink);cursor:pointer}
+.tlb-close svg{width:18px;height:18px}
+@media (hover:hover){.tlb-newtab:hover{background:rgba(255,209,0,.08)}.tlb-close:hover{background:rgba(255,255,255,.06);color:var(--yl)}}
+.tlb-body{position:relative;flex:1 1 auto;min-height:0;background:var(--bg)}
+.tlb-frame{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:transparent;color-scheme:light}
+.tlb-loading{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:14px;background:var(--bg);color:var(--steel);font-family:var(--mono);font-size:var(--t-ui);font-weight:700;letter-spacing:var(--ls-label);text-transform:uppercase;pointer-events:none}
+.is-loaded .tlb-loading{opacity:0;visibility:hidden}
+.tlb-spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--hair-hi);border-top-color:var(--yl);animation:tlb-spin .8s linear infinite}
+@keyframes tlb-spin{to{transform:rotate(360deg)}}
+.tlb-note{flex:none;margin:0;padding:10px var(--s2);padding-bottom:max(10px,env(safe-area-inset-bottom));background:var(--well);border-top:1px solid var(--hair);color:var(--steel);font-family:var(--mono);font-size:var(--t-micro);letter-spacing:var(--ls-label);text-transform:uppercase;text-align:center}
+.tlb-sentinel{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);opacity:0;pointer-events:none}
+@media (max-width:639.98px){
+ .tlb-dialog{width:100vw;width:100dvw;height:100vh;height:100dvh;border-left:0;border-right:0;border-bottom:0;border-radius:0;box-shadow:none}
+ .tlb-newtab{padding:0 8px}
+ .tlb-newtab-long{display:none}
+ .tlb-newtab-short{display:inline}
+}
+/* narrow phones: the title leaves the row (clipped, still the dialog's accessible name) so Close always sits inside the header */
+@media (max-width:419.98px){
+ .tlb-head{gap:8px;padding-left:12px}
+ .tlb-wordmark{margin-right:auto}
+ .tlb-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;clip:rect(0 0 0 0)}
+}
+@media (prefers-reduced-motion:no-preference){.is-loaded .tlb-loading{transition:opacity .2s ease,visibility 0s linear .2s}}
+@media (prefers-reduced-motion:reduce){.tlb-spinner{animation:none}}
 </style>
 <!-- html.js is structural for the flow (stacked steps). The inline script strips it again if GSAP never arrives. -->
 <script>document.documentElement.classList.add('js');</script>
@@ -380,16 +428,16 @@ main:focus{outline:0}
    <a href="#services">Services</a>
    <a href="#get-a-bin" data-sizes-link>Sizes</a>
    <a href="#area">Service Area</a>
-   <a href="#pay">Pay My Bill</a>
+   <a href="https://app.trashlab.com/customer-portal/login?orgId=0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="portal">Pay My Bill</a>
    <a class="nav-phone" href="tel:+19287132710"><span class="ph-l tab">(928) 713-2710</span><span class="ph-s">Call</span></a>
-   <a class="btn sm" href="#get-a-bin">Get a Bin</a>
+   <a class="btn sm" href="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="book">Book Online</a>
    <details class="nav-menu">
     <summary>Menu</summary>
     <div class="nav-drop">
      <a href="#services">Services</a>
      <a href="#get-a-bin" data-sizes-link>Sizes</a>
      <a href="#area">Service Area</a>
-     <a href="#pay">Pay My Bill</a>
+     <a href="https://app.trashlab.com/customer-portal/login?orgId=0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="portal">Pay My Bill</a>
     </div>
    </details>
   </nav>
@@ -420,6 +468,7 @@ main:focus{outline:0}
       <div class="chips" data-chips>
        <p class="chips-empty" data-chips-empty>Three taps, your number, and we call you.</p>
       </div>
+      <p class="flow-book">Ready to order now? <a href="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="book">Book online</a> in about two minutes.</p>
       <p class="sr" aria-live="polite" data-announce></p>
      </div>
 
@@ -491,6 +540,7 @@ main:focus{outline:0}
           <div class="tile"><input type="radio" id="sz-30" name="size" value="ro-30" data-type="ro" data-yd="30" data-dims="22 x 8 x 6 ft" data-len="22 ft long" data-holds="About 12 pickup loads" data-price="525" data-sx="1" data-sy="1"><label for="sz-30" data-advance><span><b>30 yard</b><small>12 loads</small></span><span class="sr">, 22 by 8 by 6 feet</span></label></div>
           <div class="tile"><input type="radio" id="sz-ro-tbd" name="size" value="ro-tbd" data-type="ro" data-tbd data-chip="Size on the call"><label for="sz-ro-tbd" data-advance><span><b>Not sure</b><small>We size it on the call</small></span></label></div>
          </div>
+         <p class="size-book"><a class="btn line sm" href="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="book">Book this size online</a></p>
         </fieldset>
         <fieldset data-sizes="fl">
          <legend class="sr">Front-load sizes</legend>
@@ -768,7 +818,7 @@ main:focus{outline:0}
    <div class="foot-col"><span class="hd">Call</span><a href="tel:+19287132710" class="tab">(928) 713-2710</a></div>
    <div class="foot-col"><span class="hd">Email</span><a href="mailto:sales@ywsaz.com">sales@ywsaz.com</a></div>
    <div class="foot-col"><span class="hd">Hours</span><span>Mon to Fri, 8 to 5</span></div>
-   <div class="foot-col" id="pay"><span class="hd">Pay My Bill</span><!-- TODO: swap href for the live TrashLab billing portal URL before launch --><a href="#pay">Open billing portal <span aria-hidden="true">&nearr;</span></a></div>
+   <div class="foot-col" id="pay"><span class="hd">Pay My Bill</span><a href="https://app.trashlab.com/customer-portal/login?orgId=0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="portal">Open billing portal <span aria-hidden="true">&nearr;</span><span class="sr">, opens in a new tab</span></a></div>
   </div>
   <div class="foot-base">
    <span><b>YWS</b> &copy; 2026 &middot; Yavapai Waste Solutions &middot; Prescott, AZ</span>
@@ -780,7 +830,35 @@ main:focus{outline:0}
 <!-- Sticky mini bar: appears once the hero scrolls away -->
 <div class="minibar" data-minibar>
  <a class="tel" href="tel:+19287132710">(928) 713-2710</a>
- <a class="btn sm" href="#get-a-bin" data-minibar-book>Get a Bin</a>
+ <a class="btn sm" href="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="book">Book Online</a>
+</div>
+
+<!-- TrashLab Book Online modal. Inert until a data-trashlab="book" link opens it; the iframe src is assigned on the first open only. -->
+<div class="tlb" id="trashlab-book" hidden>
+ <div class="tlb-overlay" data-tlb-overlay></div>
+ <div class="tlb-dialog" role="dialog" aria-modal="true" aria-labelledby="tlb-title" tabindex="-1">
+  <span class="tlb-sentinel" tabindex="0" data-tlb-sentinel="start"></span>
+  <div class="tlb-head">
+   <span class="tlb-wordmark" aria-hidden="true"><svg viewBox="0 0 68 52" fill="none"><path d="M2 46 L18 18 L28 34 L40 8 L54 30 L66 46" stroke="#ffd100" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><path d="M2 50 H66" stroke="#3a3e44" stroke-width="2"/></svg>YWS</span>
+   <h2 class="tlb-title" id="tlb-title">Book online</h2>
+   <a class="tlb-newtab" href="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" aria-label="Open in a new tab">
+    <span class="tlb-newtab-long">Open in a new tab</span><span class="tlb-newtab-short">New tab</span>
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5V10M9 2h5v5M14 2 7 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+   </a>
+   <button class="tlb-close" type="button" aria-label="Close">
+    <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M3 3l12 12M15 3 3 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+   </button>
+  </div>
+  <div class="tlb-body">
+   <iframe class="tlb-frame" title="TrashLab online ordering" allow="payment" data-src="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d"></iframe>
+   <div class="tlb-loading" role="status" aria-live="polite">
+    <span class="tlb-spinner" aria-hidden="true"></span>
+    <span>Loading TrashLab</span>
+   </div>
+  </div>
+  <p class="tlb-note">Orders and payments are handled securely by TrashLab.</p>
+  <span class="tlb-sentinel" tabindex="0" data-tlb-sentinel="end"></span>
+ </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
@@ -1347,8 +1425,6 @@ main:focus{outline:0}
   if (mapT) { setTown(mapT.dataset.town); preselect(mapT.dataset.town); return; }
   var sizesLink = e.target.closest('[data-sizes-link]');
   if (sizesLink) { e.preventDefault(); goTo(2); scrollToFlow(); var menu = sizesLink.closest('.nav-menu'); if (menu) menu.removeAttribute('open'); return; }
-  var mini = e.target.closest('[data-minibar-book]');
-  if (mini) { e.preventDefault(); scrollToFlow(); return; }
   var navMenu = e.target.closest('.nav-menu');
   if (navMenu && e.target.closest('a')) navMenu.removeAttribute('open');
  });
@@ -1442,6 +1518,206 @@ main:focus{outline:0}
   };
  });
  fontsReady.then(function () { fitSteps(true); if (window.ScrollTrigger) ScrollTrigger.refresh(); });
+})();
+</script>
+<!-- TrashLab Book Online: window.TrashLabBook = { open(trigger), close(), isOpen, refresh() }. Document events trashlab:open and trashlab:close.
+  data-trashlab="book" links open the modal (a real shop link first, so it works without JS); data-trashlab="portal" stays a plain new-tab link. -->
+<script>
+(function () {
+ 'use strict';
+ var SHOP = 'https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d';
+ var PORTAL = 'https://app.trashlab.com/customer-portal/login?orgId=0170d657-56c3-45a0-98c8-00f9dd3d113d';
+
+ var root = document.getElementById('trashlab-book');
+ if (!root) return;
+ var overlay = root.querySelector('.tlb-overlay');
+ var dialog = root.querySelector('.tlb-dialog');
+ var closeBtn = root.querySelector('.tlb-close');
+ var newTab = root.querySelector('.tlb-newtab');
+ var body = root.querySelector('.tlb-body');
+ var frame = root.querySelector('.tlb-frame');
+ var sStart = root.querySelector('[data-tlb-sentinel="start"]');
+ var sEnd = root.querySelector('[data-tlb-sentinel="end"]');
+
+ /* GSAP is optional: without it (or under reduced motion) the modal shows and hides instantly. */
+ var g = window.gsap || null;
+ var rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+ function animate() { return !!g && !rm.matches; }
+
+ var isOpen = false, opener = null, tl = null, framed = false, loadTimer = 0, isolated = [], scrollPrev = null, downOnOverlay = false;
+
+ function emit(name) { try { document.dispatchEvent(new CustomEvent(name)); } catch (e) {} }
+ function focusEl(el) { if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
+
+ /* iframe: src on the first open only, kept across closes. The loading layer lifts on load (15 s safety net). */
+ function loadFrame() {
+  if (framed) return;
+  framed = true;
+  frame.addEventListener('load', frameReady);
+  loadTimer = setTimeout(frameReady, 15000);
+  frame.src = frame.getAttribute('data-src') || SHOP;
+ }
+ function frameReady() { clearTimeout(loadTimer); body.classList.add('is-loaded'); }
+
+ /* everything outside the modal: aria-hidden, plus inert where the browser supports it */
+ function isolate(on) {
+  if (on) {
+   isolated = [];
+   Array.prototype.forEach.call(document.body.children, function (el) {
+    if (el === root || /^(SCRIPT|STYLE|LINK|TITLE|META)$/.test(el.tagName)) return;
+    isolated.push({ el: el, aria: el.getAttribute('aria-hidden'), inert: el.inert === true });
+    el.setAttribute('aria-hidden', 'true');
+    if ('inert' in el) el.inert = true;
+   });
+  } else {
+   isolated.forEach(function (r) {
+    if (r.aria === null) r.el.removeAttribute('aria-hidden'); else r.el.setAttribute('aria-hidden', r.aria);
+    if ('inert' in r.el) r.el.inert = r.inert;
+   });
+   isolated = [];
+  }
+ }
+
+ /* scroll lock that keeps the scrollbar gutter so the page does not shift; the fixed mini bar reads --tlb-gutter */
+ function lock() {
+  if (scrollPrev) return;
+  var de = document.documentElement, b = document.body;
+  var sw = window.innerWidth - de.clientWidth;
+  scrollPrev = { de: de.style.overflow, pad: b.style.paddingRight, gutter: de.style.getPropertyValue('--tlb-gutter') };
+  if (sw > 0) {
+   b.style.paddingRight = ((parseFloat(getComputedStyle(b).paddingRight) || 0) + sw) + 'px';
+   de.style.setProperty('--tlb-gutter', sw + 'px');
+  }
+  de.style.overflow = 'hidden';
+ }
+ function unlock() {
+  if (!scrollPrev) return;
+  var de = document.documentElement, b = document.body;
+  de.style.overflow = scrollPrev.de;
+  b.style.paddingRight = scrollPrev.pad;
+  if (scrollPrev.gutter) de.style.setProperty('--tlb-gutter', scrollPrev.gutter); else de.style.removeProperty('--tlb-gutter');
+  scrollPrev = null;
+ }
+
+ var FOCUSABLE = 'a[href], button:not([disabled]), iframe, input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+ function focusables() {
+  return Array.prototype.filter.call(dialog.querySelectorAll(FOCUSABLE), function (el) {
+   return !el.hasAttribute('data-tlb-sentinel') && el.getClientRects().length > 0;
+  });
+ }
+
+ function openModal(trigger) {
+  if (isOpen) return;
+  isOpen = true;
+  opener = (trigger && typeof trigger.focus === 'function') ? trigger : document.activeElement;
+  if (tl) { tl.kill(); tl = null; }
+  var fromHidden = root.hidden;
+  root.hidden = false;
+  lock();
+  isolate(true);
+  loadFrame();
+  if (animate()) {
+   tl = g.timeline({ onComplete: function () { tl = null; } });
+   if (fromHidden) {
+    /* the dialog fades on opacity (not autoAlpha) so the Close button can take focus on the same tick */
+    tl.fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.22, ease: 'power2.out' }, 0)
+     .fromTo(dialog, { y: 12, scale: 0.97, opacity: 0, visibility: 'inherit' }, { y: 0, scale: 1, opacity: 1, duration: 0.3, ease: 'power3.out' }, 0.04);
+   } else {
+    /* reopened mid exit: continue from wherever the exit left it */
+    g.set(dialog, { visibility: 'inherit' });
+    tl.to(overlay, { autoAlpha: 1, duration: 0.22, ease: 'power2.out' }, 0)
+     .to(dialog, { y: 0, scale: 1, opacity: 1, duration: 0.3, ease: 'power3.out' }, 0);
+   }
+  } else if (g) {
+   g.set(overlay, { autoAlpha: 1 });
+   g.set(dialog, { y: 0, scale: 1, autoAlpha: 1 });
+  }
+  focusEl(closeBtn);
+  emit('trashlab:open');
+ }
+
+ function closeModal() {
+  if (!isOpen) return;
+  isOpen = false;
+  if (tl) { tl.kill(); tl = null; }
+  isolate(false);
+  var back = opener;
+  opener = null;
+  if (back && back !== document.body && document.body.contains(back)) focusEl(back);
+  function done() { tl = null; root.hidden = true; unlock(); emit('trashlab:close'); }
+  if (animate()) {
+   tl = g.timeline({ onComplete: done });
+   tl.to(dialog, { y: 12, scale: 0.97, autoAlpha: 0, duration: 0.18, ease: 'power2.in' }, 0)
+    .to(overlay, { autoAlpha: 0, duration: 0.18, ease: 'power2.in' }, 0.02);
+  } else {
+   if (g) g.set([overlay, dialog], { autoAlpha: 0 });
+   done();
+  }
+ }
+
+ /* keyboard: Escape closes, Tab wraps inside the dialog */
+ document.addEventListener('keydown', function (e) {
+  if (!isOpen) return;
+  if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); closeModal(); return; }
+  if (e.key !== 'Tab') return;
+  var list = focusables();
+  if (!list.length) { e.preventDefault(); focusEl(closeBtn); return; }
+  var first = list[0], last = list[list.length - 1], active = document.activeElement;
+  var inside = !!active && active !== dialog && dialog.contains(active);
+  if (e.shiftKey) { if (!inside || active === first) { e.preventDefault(); focusEl(last); } }
+  else if (!inside || active === last) { e.preventDefault(); focusEl(first); }
+ });
+
+ /* sentinels catch focus leaving the cross-origin iframe, where keydown never reaches this document */
+ sStart.addEventListener('focus', function (e) {
+  var list = focusables();
+  if (!list.length) { focusEl(closeBtn); return; }
+  var from = e.relatedTarget, inside = !!from && from !== dialog && dialog.contains(from);
+  focusEl(inside ? list[list.length - 1] : list[0]);
+ });
+ sEnd.addEventListener('focus', function () { var list = focusables(); focusEl(list[0] || closeBtn); });
+
+ /* pointer: overlay click closes only when the press also started on the overlay (no close on a drag out of the frame) */
+ root.addEventListener('pointerdown', function (e) { downOnOverlay = (e.target === overlay); });
+ overlay.addEventListener('click', function () { if (downOnOverlay) closeModal(); downOnOverlay = false; });
+ closeBtn.addEventListener('click', closeModal);
+ newTab.addEventListener('click', function () { closeModal(); });
+
+ /* triggers: data-trashlab="book" opens the modal, data-trashlab="portal" stays a plain new-tab link */
+ function upgradeTriggers() {
+  Array.prototype.forEach.call(document.querySelectorAll('[data-trashlab="book"]'), function (el) {
+   if (el.tagName === 'A') {
+    var href = el.getAttribute('href');
+    if (!href || href.charAt(0) === '#') el.setAttribute('href', SHOP);
+    el.setAttribute('target', '_blank');
+    el.setAttribute('rel', 'noopener');
+   }
+   el.setAttribute('aria-haspopup', 'dialog');
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-trashlab="portal"]'), function (el) {
+   if (el.tagName !== 'A') return;
+   var href = el.getAttribute('href');
+   if (!href || href.charAt(0) === '#') el.setAttribute('href', PORTAL);
+   el.setAttribute('target', '_blank');
+   el.setAttribute('rel', 'noopener');
+  });
+ }
+ upgradeTriggers();
+ document.addEventListener('click', function (e) {
+  var t = (e.target && e.target.closest) ? e.target.closest('[data-trashlab="book"]') : null;
+  if (!t || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  e.preventDefault();
+  openModal(t);
+ });
+
+ window.TrashLabBook = {
+  open: function (trigger) { openModal(trigger); },
+  close: closeModal,
+  get isOpen() { return isOpen; },
+  refresh: upgradeTriggers,
+  SHOP_URL: SHOP,
+  PORTAL_URL: PORTAL
+ };
 })();
 </script>
 
