@@ -1,0 +1,1542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Let's Talk Trash</title>
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" href="assets/yws-icon-128.png">
+<script>document.documentElement.classList.add('js');setTimeout(function(){if(typeof gsap==='undefined')document.documentElement.classList.remove('js');},3000);</script>
+<!-- Direction A+B, merged per the client notes of 2026-09-22.
+FROM A: the kinetic Anton headline (word slam with overshoot, plate on Talk) and the marquee tape under the hero.
+FROM B: the Prescott dusk scene, the truck entrance timeline, tokens, card and patch styles, service area map, mini bar (narrow screens only), footer.
+FROM THE COMPONENTS: the size visualizer (scene SVG plus spring tween) as a standalone showcase with no booking link; the Get a Bin
+state machine reduced to service, town, name and phone as a secondary callback flow; the TrashLab Book Online modal.
+BRAND: the real YWS logo (assets/yws-logo-white.png, yws-logo-dark.png, yws-icon-128.png) by relative path. Black and white are the
+brand colors; dusk navy and cream support them; one restrained yellow marks interactive elements, plus the ticker stars the client saw on A.
+RULES: only transform and opacity animate, plus the measured step-height glide in the callback flow. Solid borders only. Reduced
+motion is read before any timeline. Without JS the page reads fully: Book Online is a plain link to the shop, the logo is an img.
+PLACEHOLDERS: the quotes are invented examples; the callback POST is simulated; delivery turnaround is TBD with the owner. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+--black:#0B0D11;--navy:#1B2430;--navy-deep:#141B25;--navy-ink:#0E141D;--slate:#3D4A5E;--granite:#8D8D93;
+--cream:#F5F1E8;--card:#FBF8F1;--cream-deep:#D9D2C0;--ink:#1A1713;--ink-soft:#5D5748;
+--yellow:#FFC72C;--yellow-deep:#D9A61F;
+--cream-90:rgba(245,241,232,.9);--cream-70:rgba(245,241,232,.7);
+--line-ink:rgba(26,23,19,.16);--line-ink-strong:rgba(26,23,19,.55);
+--line-cream:rgba(245,241,232,.18);--line-cream-strong:rgba(245,241,232,.75);
+--head:'Anton',Impact,'Arial Narrow Bold','Helvetica Neue',Arial,sans-serif;
+--disp:'Bricolage Grotesque','Inter','Helvetica Neue',Arial,sans-serif;
+--body:'Inter','Helvetica Neue',Arial,sans-serif;
+--label:700 .72rem/1 var(--body);--track:.14em;
+--nav-h:68px;--rad:18px;--rad-sm:10px;--pad-x:clamp(1rem,5vw,4rem);
+--gap-card:clamp(1rem,2.4vw,1.5rem);--gap-2col:clamp(1.6rem,4vw,3.5rem);
+--sh-card:0 30px 60px rgba(14,20,29,.38),0 8px 20px rgba(14,20,29,.22);
+--sh-md:0 10px 24px rgba(20,27,37,.12),0 2px 6px rgba(20,27,37,.08);
+--spring:cubic-bezier(.34,1.56,.64,1);
+--z-mini:90;--z-nav:100;--z-skip:300;--z-modal:1000;
+--c-hair:var(--line-ink);--c-track:rgba(26,23,19,.12);--c-muted:var(--ink-soft);
+--fs-q:clamp(1.35rem,1.1rem + 1vw,1.7rem);--fs-body:1rem;--fs-small:.875rem;--fs-sub:.9rem;
+--r-card:22px;--r-tile:14px;--r-pill:999px;
+--s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;
+--tap:44px;--ring:3px;--flow-w:600px;
+--c-scrim:rgba(0,0,0,.74);--c-head-rule:rgba(245,241,232,.28);--c-head-hover:rgba(245,241,232,.12);--c-frame-bg:#fff;
+--modal-w:1050px;--modal-h:820px;--modal-gap:16px;--modal-head-h:56px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{overflow-x:clip;scroll-padding-top:calc(var(--nav-h) + 16px)}
+body{margin:0;overflow-x:clip;background:var(--navy-ink);color:var(--cream);color-scheme:dark;font:400 16px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+img{max-width:100%;height:auto}
+svg{display:block;max-width:100%}
+h1,h2,h3,p,ul,figure,blockquote,fieldset{margin:0;padding:0}
+ul{list-style:none}
+fieldset{border:0;min-width:0}
+legend{padding:0}
+a{color:inherit}
+button{font:inherit}
+::selection{background:var(--yellow);color:var(--navy-deep)}
+:focus-visible{outline:var(--ring) solid var(--yellow);outline-offset:3px}
+.on-cream :focus-visible,.flow :focus-visible{outline-color:var(--ink)}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+@media (prefers-reduced-motion:reduce){.btn,.tile label::after,.qdot::before{transition:none}}
+.display{font-family:var(--disp);font-weight:750;letter-spacing:-.015em;line-height:1.05;text-wrap:balance;font-size:clamp(1.9rem,3.6vw,2.8rem)}
+.kicker{display:inline-flex;align-items:center;gap:.6em;font:var(--label);letter-spacing:var(--track);text-transform:uppercase}
+.kicker::before{content:"";width:.55em;height:.55em;background:currentColor;opacity:.7;transform:rotate(45deg);flex:none}
+.on-cream .kicker{color:var(--ink-soft)}
+.on-navy .kicker{color:var(--cream-70)}
+.lede{font-size:clamp(1rem,1.4vw,1.15rem);max-width:30em}
+.on-cream .lede{color:var(--ink-soft)}
+.on-navy .lede{color:var(--cream-90)}
+.sec-head{display:grid;gap:.75rem;max-width:640px;margin-bottom:clamp(1.5rem,3vw,2.25rem)}
+.band{padding:clamp(2.5rem,5vw,4rem) var(--pad-x)}
+.on-cream{background:var(--cream);color:var(--ink);color-scheme:light}
+.on-navy{background:var(--navy);color:var(--cream)}
+.wrap{max-width:1200px;margin-inline:auto}
+.dv{background:var(--a)}
+.dv svg{width:100%;height:clamp(40px,6vw,72px);fill:var(--b)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:0 1.4rem;border-radius:999px;border:2px solid var(--line-cream-strong);background:transparent;color:var(--cream);font:700 1rem/1.15 var(--body);text-decoration:none;cursor:pointer;white-space:nowrap;transition:transform .3s var(--spring)}
+.btn svg{width:18px;height:18px;flex:none;fill:currentColor}
+.btn.primary{background:var(--yellow);border-color:var(--yellow);color:var(--navy-deep)}
+.btn-lg{min-height:56px;padding:0 1.8rem;font-size:1.05rem}
+.on-cream .btn,.flow .btn{color:var(--ink);border-color:var(--line-ink-strong)}
+.on-cream .btn.primary,.flow .btn.primary{color:var(--navy-deep);border-color:var(--yellow)}
+@media (hover:hover){.btn:hover{transform:translateY(-2px)}.btn.primary:hover{background:var(--yellow-deep);border-color:var(--yellow-deep)}}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn[disabled]{opacity:.6;cursor:default}
+.flow .btn{transition:none;min-height:52px}
+.flow .btn:hover,.flow .btn:active{transform:none}
+.btn[data-submit]{min-width:12ch}
+.skip{position:fixed;top:10px;left:10px;z-index:var(--z-skip);background:var(--yellow);color:var(--navy-deep);font-weight:700;padding:.7rem 1.1rem;border-radius:var(--rad-sm);text-decoration:none;transform:translateY(-160%)}
+.skip:focus-visible{transform:none}
+/* ---- nav: the real logo first, then phone, portal and the primary Book Online ---- */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:var(--z-nav);height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 clamp(1rem,3.5vw,2.4rem);background:rgba(11,13,17,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-cream)}
+.brand{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;border-radius:6px}
+.brand-logo{display:block;height:44px;width:auto}
+.nav-cta{display:flex;align-items:center;gap:.9rem}
+.nav-link{display:inline-flex;align-items:center;min-height:44px;padding:0 .25rem;font:600 .92rem/1 var(--body);text-decoration:none;color:var(--cream-90);white-space:nowrap}
+.nav-link:hover{color:var(--yellow)}
+.nav-tel{display:inline-flex;align-items:center;gap:.5rem;min-height:44px;font:700 .95rem/1 var(--body);text-decoration:none;color:var(--cream);white-space:nowrap;padding:0 .25rem;font-variant-numeric:tabular-nums}
+.nav-tel svg{width:18px;height:18px;flex:none}
+.nav-tel:hover{color:var(--yellow)}
+/* ---- hero: B's dusk scene under the logo, A's headline, the CTAs, the truck ---- */
+.hero{position:relative;overflow:clip;display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:calc(100vh - var(--nav-h));min-height:calc(100svh - var(--nav-h));background:linear-gradient(180deg,#1B2430 0%,#2E3049 38%,#5C4358 58%,#98574B 72%,#CF7A4B 84%,#E8A45C 100%)}
+.sky{position:absolute;inset:0;pointer-events:none}
+.sun{position:absolute;left:auto;right:6%;top:6%;width:min(14vw,180px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#FFF1D6 0%,#F2B676 40%,rgba(242,182,118,0) 72%)}
+.cloud{position:absolute;opacity:.4}
+.c1{top:8%;left:58%;width:min(22vw,260px)}
+.c2{top:30%;left:-6vw;width:min(18vw,200px);opacity:.28}
+.hawk{position:absolute;top:12%;left:46%;width:64px;opacity:.85}
+.mtn{position:absolute;left:-3%;width:106%;bottom:56px}
+.mtn svg{width:100%;height:100%}
+.mtn-far{height:min(34svh,300px)}
+.mtn-near{height:min(22svh,200px)}
+.hero-grid{position:relative;z-index:2;width:100%;max-width:1200px;margin-inline:auto;display:grid;grid-template-rows:auto minmax(0,1fr);gap:1rem;padding:clamp(1.5rem,4vh,2.5rem) var(--pad-x) 0}
+.hero-copy{display:grid;gap:clamp(.9rem,2vh,1.4rem);justify-items:start;align-content:start;min-width:0}
+.hero-logo{display:block;width:clamp(130px,12vw,180px);height:auto}
+.hero-h{font:400 clamp(3.6rem,9vw,8.25rem)/.88 var(--head);text-transform:uppercase;letter-spacing:.01em;color:var(--cream)}
+.mask{display:inline-block;overflow:clip;padding:.16em .12em 0;margin:-.16em -.12em 0;vertical-align:top}
+.word{display:inline-block}
+.word-plate{background:var(--cream);color:var(--navy-ink);padding:.02em .1em .06em;border-radius:.06em}
+.hero-sub{font-size:clamp(1rem,1.4vw,1.15rem);color:var(--cream-90);max-width:28em}
+.hero-ctas{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem}
+.stage{grid-row:2;align-self:end;justify-self:end;position:relative;z-index:1;width:min(100%,560px);margin-bottom:-10px}
+.stage svg{width:100%;height:auto;overflow:visible}
+.road{position:relative;z-index:1;height:56px;background:var(--navy-deep)}
+.road::before,.road::after{content:"";position:absolute;left:0;right:0;height:3px;background:rgba(245,241,232,.28)}
+.road::before{top:22px}
+.road::after{top:29px}
+/* first paint matches the intro's start state; GSAP's inline writes take over. Reduced motion never hides anything. */
+@media (prefers-reduced-motion:no-preference){.js .hero-logo,.js .hero-sub,.js .hero-ctas,.js .hero-h .word,.js .rig{visibility:hidden}}
+/* ---- ticker: A's tape, straight, the road surface under the hero ---- */
+.tape{background:var(--black);color:var(--cream);display:flex;align-items:center;border-top:1px solid var(--line-cream);border-bottom:1px solid var(--line-cream)}
+.tape-viewport{flex:1 1 auto;min-width:0;overflow:clip}
+.tape-track{display:flex;width:max-content;will-change:transform}
+.tape-group{display:flex;align-items:center;flex:none;white-space:nowrap;font:800 clamp(1rem,2vw,1.35rem)/1 var(--disp);letter-spacing:.08em;text-transform:uppercase;padding-block:.95rem}
+.tape-group b{font-weight:400;color:var(--yellow);padding:0 .7em}
+/* four copies of the group so the loop has no gap on wide screens; the track moves half its width per cycle, so 64 s keeps A's speed of 32 s per group */
+@media (prefers-reduced-motion:no-preference){
+.tape-track{animation:tape-drift 64s linear infinite}
+@keyframes tape-drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (hover:hover){.tape:hover .tape-track{animation-play-state:paused}}
+.tape-paused .tape-track,.tape.is-off .tape-track{animation-play-state:paused}
+}
+.tape-pause{display:none;flex:none;margin-inline:1rem;min-height:44px;padding:0 .8rem;border-radius:999px;border:1px solid var(--line-cream-strong);background:transparent;color:var(--cream);font:700 .72rem/1 var(--body);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.js .tape-pause{display:inline-flex;align-items:center}
+/* reduced motion: one copy, wrapped and centred; the aria-hidden copies and the trailing star exist only for the loop */
+@media (prefers-reduced-motion:reduce){
+.js .tape-pause{display:none}
+.tape-group[aria-hidden]{display:none}
+.tape-track{width:100%}
+.tape-group{flex:1 1 auto;flex-wrap:wrap;justify-content:center;row-gap:.5rem;white-space:normal;padding-inline:var(--pad-x)}
+.tape-group span{white-space:nowrap}
+.tape-group > b:last-child{display:none}
+}
+/* ---- size showcase: chunky tabs, a small family switch, the scene card. No prices, no booking step. ---- */
+.sz-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,600px);gap:var(--gap-2col);align-items:start}
+.sz-copy{display:grid;gap:1.25rem;justify-items:start}
+.sz-copy .sec-head{margin-bottom:0}
+.seg-ctl{display:inline-flex;padding:3px;border:1px solid var(--line-ink);border-radius:999px;background:var(--card)}
+.seg-opt{position:relative}
+.seg-opt input,.pill input,.tile input{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.seg-opt label{display:inline-flex;align-items:center;min-height:44px;padding:0 1rem;border-radius:999px;font:600 .9rem/1 var(--body);color:var(--ink);cursor:pointer;white-space:nowrap}
+.seg-opt input:checked + label{background:var(--ink);color:var(--cream)}
+.tabs-wrap{display:grid;gap:1rem;width:100%}
+.tabs{display:grid;gap:.6rem}
+.label{display:block;margin-bottom:var(--s-2);font:var(--label);letter-spacing:var(--track);text-transform:uppercase;color:var(--c-muted)}
+.tabs .label{margin-bottom:0}
+.pills{display:flex;flex-wrap:wrap;gap:var(--s-2)}
+.pill{position:relative}
+.pill label{display:inline-flex;align-items:center;justify-content:center;min-height:var(--tap);padding:0 var(--s-4);border:1px solid var(--c-hair);border-radius:var(--r-pill);background:var(--card);color:var(--ink);font-size:var(--fs-body);font-weight:600;white-space:nowrap;cursor:pointer}
+.pill input:checked + label{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.pills.big .pill label{min-height:56px;padding:0 1.4rem;border-width:2px;border-color:var(--line-ink-strong);font:750 1.15rem/1 var(--disp);letter-spacing:-.01em}
+.pills.big .pill input:checked + label{border-color:var(--ink)}
+.seg-opt input:focus-visible + label,.pill input:focus-visible + label,.tile input:focus-visible + label{outline:var(--ring) solid var(--ink);outline-offset:2px}
+.js [data-set][data-off]{display:none}
+.scene-card{position:relative;display:flex;flex-direction:column;gap:var(--s-3);padding:clamp(1rem,2.4vw,1.5rem);background:var(--card);border:1px solid var(--line-ink);border-radius:var(--rad);box-shadow:var(--sh-md)}
+/* a hover preview marks the card; the kicker sits in the corner so the caption widths never move */
+.scene-card[data-preview]::before{content:"Shown";position:absolute;top:var(--s-3);right:var(--s-4);font:var(--label);letter-spacing:var(--track);text-transform:uppercase;color:var(--ink-soft);pointer-events:none}
+.scene svg{display:block;width:100%;height:auto;color:var(--granite)}
+.scene [data-bin]{color:var(--ink)}
+.scene .p{fill:var(--card)}
+.scene .ground{stroke:var(--ink-soft);stroke-width:1.5;opacity:.5}
+.scene .tag{font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:.04em;fill:var(--ink-soft)}
+@media (max-width:640px){.scene .tag{font-size:15px}}
+@media (max-width:480px){.scene .tag{font-size:20px}}
+.spec{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--s-1) var(--s-4);font-variant-numeric:tabular-nums;color:var(--ink)}
+.spec .yd{font-family:var(--disp);font-size:1.6rem;font-weight:750;letter-spacing:-.02em;line-height:1}
+.spec .dims{font-size:var(--fs-small);color:var(--ink-soft)}
+.spec .fits{font-size:var(--fs-small);font-weight:600;margin-left:auto}
+@media (max-width:560px){.spec .fits{flex-basis:100%;margin-left:0}}
+/* ---- services: B's card, one line each ---- */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap-card)}
+.svc{display:grid;gap:.9rem;padding:1.25rem;background:var(--card);border:1px solid var(--line-ink);border-radius:var(--rad);box-shadow:var(--sh-md);align-content:start}
+.svc-ic{width:48px;height:48px;border-radius:50%;background:var(--navy);display:grid;place-items:center}
+.svc-ic svg{width:28px;height:28px;color:var(--cream)}
+.svc h3{font:750 1.2rem/1.15 var(--disp);letter-spacing:-.01em}
+.svc p{font-size:.95rem;color:var(--ink-soft);max-width:26em}
+/* ---- trust: B's patches, solid rings ---- */
+.trust{padding:clamp(2rem,4vw,3rem) var(--pad-x)}
+.trust-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap-card);max-width:900px;margin-inline:auto}
+.patch{display:grid;gap:.8rem;justify-items:center;text-align:center;min-width:0}
+.patch svg{width:112px;height:112px}
+.patch b{font:750 1.02rem/1.2 var(--disp);color:var(--cream);overflow-wrap:anywhere}
+/* ---- quote ---- */
+.quote{background:var(--navy-deep);border-top:1px solid var(--line-cream)}
+.quote-in{display:grid;gap:1rem;justify-items:start}
+.quote blockquote{position:relative;padding-left:.75em;font:600 clamp(1.35rem,2.4vw,2rem)/1.3 var(--disp);letter-spacing:-.01em;max-width:22em;text-wrap:balance}
+.quote blockquote::before{content:"\201C";position:absolute;left:0;top:-.08em;font-size:1.5em;line-height:1;color:var(--granite)}
+.qcite{font:var(--label);letter-spacing:var(--track);text-transform:uppercase;color:var(--cream-70);padding-left:1.15em}
+.qdots{display:flex;gap:.1rem;margin-left:-.7rem}
+.qdot{width:44px;height:44px;display:grid;place-items:center;background:none;border:0;padding:0;cursor:pointer;color:var(--line-cream-strong)}
+.qdot::before{content:"";width:10px;height:10px;border-radius:50%;background:currentColor;transform:scale(.8);transition:transform .35s var(--spring)}
+.qdot[aria-current="true"]{color:var(--yellow)}
+.qdot[aria-current="true"]::before{transform:scale(1.25)}
+/* ---- service area: chips everywhere, B's map on wide screens ---- */
+.area-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:var(--gap-2col);align-items:center}
+.area-copy{display:grid;gap:1.25rem;justify-items:start}
+.area-copy .sec-head{margin-bottom:0}
+.towns{display:flex;flex-wrap:wrap;gap:.5rem}
+.town{display:inline-flex;align-items:center;min-height:44px;padding:0 .95rem;font:600 .92rem/1 var(--body);color:var(--ink);background:var(--card);border:1px solid var(--line-ink-strong);border-radius:999px;cursor:pointer}
+.town.is-hot,.town:hover{background:var(--yellow);border-color:var(--yellow-deep)}
+.area-note{font-size:.95rem;color:var(--ink-soft)}
+.area-note a{color:var(--ink);font-weight:700}
+.area-map{border-radius:var(--rad);overflow:clip;border:1px solid var(--line-ink);box-shadow:var(--sh-md);background:#EDE8DA}
+.area-map svg{width:100%;height:auto}
+.map text{font-family:var(--body);font-weight:700;font-size:17px;fill:var(--ink)}
+.pin{cursor:pointer;pointer-events:bounding-box}
+.pin .dot{fill:var(--navy);stroke:var(--cream);stroke-width:0}
+.pin.hub .dot{fill:var(--black);stroke-width:3}
+.pin.is-hot .dot{fill:var(--yellow);stroke:var(--navy-deep);stroke-width:3}
+.pin:focus-visible{outline:none}
+.pin:focus-visible .dot{stroke:var(--yellow);stroke-width:4}
+.callout{pointer-events:none}
+.callout rect,.callout path{fill:var(--black)}
+.callout text{fill:var(--cream);font-size:15px;font-weight:700}
+/* ---- callback: the Get a Bin card, secondary ---- */
+.cb-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,var(--flow-w));gap:var(--gap-2col);align-items:start}
+.cb-copy{display:grid;gap:1rem;justify-items:start}
+.cb-copy .display{font-size:clamp(1.6rem,2.6vw,2.1rem)}
+.flow{--flow-pad:var(--s-5);display:flex;flex-direction:column;gap:var(--s-4);overflow:clip;padding:var(--flow-pad);border:1px solid rgba(26,23,19,.2);border-radius:var(--r-card);background:var(--card);color:var(--ink);box-shadow:var(--sh-card);color-scheme:light}
+@media (max-width:480px){.flow{--flow-pad:var(--s-4)}}
+.flow-head{display:flex;flex-direction:column;gap:var(--s-3)}
+.flow-kicker{color:var(--ink-soft)}
+.rail-row{display:flex;align-items:center;gap:var(--s-3)}
+.rail{display:flex;gap:var(--s-1);flex:1}
+.seg{position:relative;flex:1;height:6px;border-radius:3px;background:var(--c-track);overflow:hidden}
+.fill{position:absolute;inset:0;border-radius:3px;background:var(--navy);transform-origin:0 50%}
+.seg.is-current .fill{background:var(--yellow)}
+.counter{font-size:var(--fs-small);font-weight:600;color:var(--c-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chips{position:relative;display:flex;flex-wrap:nowrap;align-items:center;gap:var(--s-2);min-height:calc(var(--tap) + 12px);padding:6px;margin:-6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips-empty{margin:0;font-size:var(--fs-body);color:var(--c-muted)}
+.chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:var(--tap);padding:0 var(--s-4);border:1px solid var(--c-hair);border-radius:var(--r-pill);background:var(--cream);color:var(--ink);font:inherit;font-size:var(--fs-body);font-weight:600;white-space:nowrap;cursor:pointer}
+.chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.chip.is-current{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.chip[disabled]{cursor:default;opacity:.6}
+/* steps: stacked sections without JS. With JS the steps share one grid cell and the box clips to a height measured from the active step and glided on every change (the one sanctioned layout animation). */
+.step{display:flex;flex-direction:column;gap:var(--s-4)}
+.step + .step{margin-top:var(--s-3);padding-top:var(--s-5);border-top:1px solid var(--c-hair)}
+.js .steps{display:grid;overflow:clip;padding:8px var(--flow-pad);margin:-8px calc(var(--flow-pad) * -1)}
+.js .step{grid-area:1 / 1;align-self:start;margin-top:0;padding-top:0;border-top:0}
+.js .step:not([data-step="1"]){visibility:hidden}
+.js .seg:not(.is-current) .fill{transform:scaleX(0)}
+.step-top{display:flex;align-items:center;gap:var(--s-3);min-height:var(--tap)}
+.back{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:var(--tap);min-height:var(--tap);padding:0 var(--s-3) 0 var(--s-2);border:1px solid var(--c-hair);border-radius:var(--r-pill);background:var(--card);color:var(--ink);font:inherit;font-size:var(--fs-small);font-weight:600;cursor:pointer}
+.back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.q{margin:0;font-family:var(--disp);font-size:var(--fs-q);font-weight:750;letter-spacing:-.015em;line-height:1.1;text-wrap:balance}
+.q:focus{outline:none}
+.q:focus-visible{outline:var(--ring) solid var(--ink);outline-offset:4px;border-radius:4px}
+.flow .label,.flow .kicker{font-size:.875rem;letter-spacing:.08em}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-3)}
+@media (max-width:360px){.tiles{grid-template-columns:1fr}}
+.tile{position:relative;min-width:0}
+.tile label{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:var(--s-3);min-height:112px;padding:var(--s-4);border:1px solid var(--c-hair);border-radius:var(--r-tile);background:var(--cream);color:var(--ink);cursor:pointer}
+.tile label::after{content:"";position:absolute;inset:-2px;border-radius:calc(var(--r-tile) + 2px);box-shadow:0 0 0 2px var(--ink),0 14px 30px rgba(26,23,19,.25);opacity:0;transition:opacity .3s ease;pointer-events:none}
+.tile label b{display:block;font-family:var(--disp);font-weight:700;font-size:1.05rem;line-height:1.15}
+.tile label small{display:block;margin-top:2px;font-size:var(--fs-sub);line-height:1.3;color:var(--c-muted)}
+.tile svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.tile input:checked + label{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.tile input:checked + label::after{opacity:1}
+.tile input:checked + label small{color:var(--cream);opacity:.75}
+@media (max-width:400px){.tile label{padding:14px}.tile label b{font-size:1rem}}
+@media (hover:hover){.tile label:hover,.pill label:hover,.chip:hover,.back:hover,.seg-opt label:hover{border-color:var(--line-ink-strong)}}
+.field .label{margin-bottom:var(--s-1)}
+.input{display:block;width:100%;min-height:48px;padding:0 var(--s-4);border:1px solid var(--line-ink-strong);border-radius:12px;background:#fff;color:var(--ink);font:inherit;font-size:var(--fs-body)}
+.input[aria-invalid="true"]{border-color:var(--ink);border-width:2px}
+.hint{margin:0;min-height:1.4rem;font-size:var(--fs-small);font-weight:600;color:var(--ink)}
+.hint a{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.fields{display:flex;flex-direction:column;gap:var(--s-4)}
+.actions{display:flex;justify-content:flex-end;align-items:center;gap:var(--s-3);margin-top:var(--s-2);min-height:52px}
+.actions.who{flex-direction:row-reverse;justify-content:space-between;flex-wrap:wrap}
+.alt{margin:0;font-size:var(--fs-body);color:var(--c-muted)}
+.alt a{display:inline-flex;align-items:center;min-height:var(--tap);color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+@media (max-width:480px){.flow .btn{width:100%}.actions.who{flex-direction:column;align-items:stretch}.alt{text-align:center}}
+.done{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-3);padding:var(--s-5);border:1px solid var(--c-hair);border-radius:var(--r-tile);background:var(--cream)}
+.done:focus{outline:none}
+.done:focus-visible{outline:var(--ring) solid var(--ink);outline-offset:3px}
+.done p{margin:0}
+.done-msg{font-family:var(--disp);font-weight:600;font-size:1.15rem}
+.done-recap{font-size:var(--fs-body);color:var(--c-muted)}
+.rail-row,.back,[data-next-row]{display:none}
+.js .rail-row{display:flex}
+.js .back{display:inline-flex}
+.js [data-next-row]{display:flex}
+/* ---- footer ---- */
+footer{background:var(--navy-ink);color:var(--cream);padding:clamp(2.5rem,5vw,3.5rem) var(--pad-x) 6.5rem}
+.foot{max-width:1200px;margin-inline:auto;display:grid;grid-template-columns:1.2fr 1fr auto;gap:2rem;align-items:start}
+.foot-brand{display:grid;gap:.75rem;justify-items:start}
+.foot-logo{display:block;width:132px;height:auto}
+.foot-note{font-size:.875rem;color:var(--granite);max-width:24em}
+.foot-list{display:grid;gap:.1rem;font-size:.95rem}
+.foot-list li{display:flex;align-items:center;min-height:44px;color:var(--cream-90)}
+.foot-list a{color:var(--cream-90);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
+.foot-list a:hover{color:var(--yellow)}
+.foot-bill{display:grid;gap:.75rem;justify-items:start}
+.foot-bottom{max-width:1200px;margin:2rem auto 0;padding-top:1.25rem;border-top:1px solid var(--line-cream);display:flex;flex-wrap:wrap;gap:.6rem 1.5rem;justify-content:space-between;font-size:.875rem;color:var(--granite)}
+/* ---- mini bar: in flow without ScrollTrigger, fixed and driven by it otherwise (html.st). Narrow screens only: from 900px up the sticky nav already carries the phone and the one primary Book Online ---- */
+.mini{display:flex;align-items:center;justify-content:center;gap:.6rem;width:max-content;max-width:calc(100% - 2rem);margin:1rem auto;padding:.5rem .5rem .5rem .6rem;background:rgba(11,13,17,.94);border:1px solid var(--line-cream);border-radius:999px;box-shadow:var(--sh-card)}
+.js.st .mini{position:fixed;left:1rem;right:calc(1rem + var(--tlb-gutter,0px));bottom:max(1rem,env(safe-area-inset-bottom,0px));z-index:var(--z-mini);margin:0 auto;visibility:hidden}
+@media (min-width:900px){.js.st .mini{display:none}.js.st footer{padding-bottom:clamp(2.5rem,5vw,3.5rem)}}
+.mini-tel{display:inline-flex;align-items:center;gap:.45rem;min-height:44px;padding:0 .8rem;color:var(--cream);font:700 1rem/1 var(--body);text-decoration:none;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mini-tel svg{width:18px;height:18px;flex:none}
+/* ---- breakpoints ---- */
+@media (max-width:1099px){.area-grid{grid-template-columns:minmax(0,1fr) minmax(0,460px)}}
+@media (max-width:899px){
+.hero-grid{grid-template-rows:auto auto}
+.stage{justify-self:center;width:min(100%,420px);margin-top:.5rem}
+.sun{left:auto;right:6vw;top:14px;width:min(22vw,120px)}
+.c1{top:3%;left:44%}
+.c2{top:36%;left:-4vw}
+.hawk{top:7%;left:40%}
+.mtn-far{height:260px}
+.mtn-near{height:170px}
+.sz-grid,.cb-grid,.area-grid{grid-template-columns:1fr}
+.area-map{display:none}
+.svc-grid{grid-template-columns:1fr;max-width:560px;margin-inline:auto}
+:root{--nav-h:60px}
+.nav{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(11,13,17,.96)}
+.foot{grid-template-columns:1fr 1fr}
+}
+@media (max-width:599px){
+.nav-link{display:none}
+.hero-copy{justify-items:center;text-align:center}
+.hero-h .mask{display:block}
+.hero-ctas{flex-direction:column;align-items:stretch;width:100%;max-width:340px}
+.stage{width:min(100%,340px)}
+.pills.big .pill label{padding:0 1.1rem}
+}
+@media (max-width:560px){
+.nav-tel span{display:none}
+.nav-tel{width:44px;justify-content:center;padding:0}
+.nav-cta{gap:.4rem}
+.nav .btn{padding:0 1rem;font-size:.92rem}
+.trust-row{gap:.5rem}
+.patch svg{width:88px;height:88px}
+.patch b{font-size:.85rem}
+.foot{grid-template-columns:1fr}
+.mini .btn{padding:0 1rem}
+}
+/* ---- TrashLab Book Online modal (components/trashlab-booknow.html, reskinned): black head with the icon, paper frame ---- */
+.tlb{position:fixed;inset:0;z-index:var(--z-modal);display:grid;place-items:center;overscroll-behavior:contain}
+.tlb-overlay{position:absolute;inset:0;background:var(--c-scrim);touch-action:none}
+.tlb-dialog{position:relative;display:flex;flex-direction:column;overflow:hidden;outline:0;width:min(100vw - var(--modal-gap) * 2,var(--modal-w));height:min(100vh - var(--modal-gap) * 2,var(--modal-h));height:min(100dvh - var(--modal-gap) * 2,var(--modal-h));background:var(--card);color:var(--ink);border-radius:var(--r-card);box-shadow:var(--sh-card);color-scheme:light;will-change:transform,opacity}
+.tlb-head{display:flex;align-items:center;gap:var(--s-3);flex:none;height:var(--modal-head-h);padding:0 var(--s-2) 0 var(--s-4);background:var(--black);color:var(--cream);border-bottom:1px solid var(--line-cream)}
+.tlb-icon{flex:none;width:28px;height:28px;border-radius:6px}
+.tlb-title{margin:0 auto 0 0;padding-left:var(--s-3);border-left:1px solid var(--c-head-rule);font:600 .92rem/1.2 var(--body);color:var(--cream-90);white-space:nowrap}
+.tlb-newtab{display:inline-flex;align-items:center;gap:.4em;min-height:var(--tap);padding:0 var(--s-3);border-radius:999px;color:var(--cream-90);font:600 .82rem/1 var(--body);text-decoration:none;white-space:nowrap}
+.tlb-newtab svg{width:14px;height:14px}
+.tlb-newtab-short{display:none}
+.tlb-close{flex:none;width:var(--tap);height:var(--tap);display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:transparent;color:var(--cream);cursor:pointer}
+.tlb-close svg{width:18px;height:18px}
+@media (hover:hover){.tlb-newtab:hover,.tlb-close:hover{background:var(--c-head-hover);color:var(--yellow)}}
+.tlb-body{position:relative;flex:1 1 auto;min-height:0;background:var(--c-frame-bg)}
+.tlb-frame{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:transparent;color-scheme:light}
+.tlb-loading{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:var(--s-3);background:var(--c-frame-bg);color:var(--ink-soft);font:600 var(--fs-small)/1.4 var(--body);pointer-events:none}
+.is-loaded .tlb-loading{opacity:0;visibility:hidden;transition:opacity .2s ease,visibility 0s linear .2s}
+.tlb-spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--c-track);border-top-color:var(--black);animation:tlb-spin .8s linear infinite}
+@keyframes tlb-spin{to{transform:rotate(360deg)}}
+.tlb-note{flex:none;margin:0;padding:var(--s-2) var(--s-4);padding-bottom:max(var(--s-2),env(safe-area-inset-bottom,0px));background:var(--cream);border-top:1px solid var(--line-ink);color:var(--ink-soft);font-size:.8125rem;text-align:center}
+.tlb-sentinel{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);opacity:0;pointer-events:none}
+@media (max-width:639.98px){
+.tlb-dialog{width:100vw;width:100dvw;height:100vh;height:100dvh;border-radius:0;box-shadow:none}
+.tlb-head{padding-left:var(--s-3)}
+.tlb-newtab{padding:0 var(--s-2)}
+}
+@media (max-width:419.98px){.tlb-newtab-long{display:none}.tlb-newtab-short{display:inline}}
+@media (prefers-reduced-motion:reduce){.tlb-spinner{animation:none}.is-loaded .tlb-loading{transition:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<path id="shape-hills" d="M0,80 L0,46 C120,20 260,58 420,44 C580,30 700,60 880,48 C1060,36 1200,62 1440,40 L1440,80 Z"/>
+<path id="shape-dells" d="M0,80 L0,50 Q60,18 120,50 Q150,64 190,52 Q220,10 300,44 Q330,58 380,50 Q440,24 520,54 Q560,68 620,52 Q680,16 760,48 Q800,62 860,50 Q920,26 1000,52 Q1040,64 1100,50 Q1160,22 1240,48 Q1300,60 1360,46 Q1400,38 1440,52 L1440,80 Z"/>
+<path id="arc" d="M20,70 A46,46 0 0 1 112,70"/>
+<g id="wheel-art"><circle r="18" fill="#8D8D93"/><rect x="-3" y="-18" width="6" height="36" rx="3" fill="#4A4F58"/><rect x="-18" y="-3" width="36" height="6" rx="3" fill="#4A4F58"/><circle r="6.5" fill="#F5F1E8"/></g>
+<path id="ic-phone" d="M6.6,3 C7.4,3 8,3.5 8.3,4.2 L9.6,7.4 C9.9,8.1 9.7,8.9 9.1,9.4 L7.7,10.6 C8.9,13 10.9,15 13.4,16.3 L14.6,14.9 C15.1,14.3 15.9,14.1 16.6,14.4 L19.8,15.7 C20.5,16 21,16.6 21,17.4 L21,19.5 C21,20.4 20.3,21 19.4,21 C10.4,20.5 3.5,13.6 3,4.6 C3,3.7 3.6,3 4.5,3 Z"/>
+<g id="ic-roll"><path d="M6,40 L11,16 L37,16 L42,40 Z" fill="currentColor"/><rect x="9" y="12" width="30" height="5" rx="2" fill="currentColor"/><rect x="17" y="21" width="3.5" height="14" fill="#1B2430"/><rect x="27" y="21" width="3.5" height="14" fill="#1B2430"/></g>
+<g id="ic-build"><path d="M10,40 L10,24 L24,12 L38,24 L38,40 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><rect x="20" y="30" width="8" height="10" fill="currentColor"/><path d="M31,6 l9,9" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></g>
+<g id="ic-front"><path d="M8,20 L40,20 L40,40 L8,40 Z" fill="currentColor"/><path d="M8,20 L14,10 L46,10 L40,20 Z" fill="currentColor"/><rect x="14" y="26" width="20" height="4" rx="2" fill="#1B2430"/></g>
+</defs>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="nav" aria-label="Main">
+<a class="brand" href="#top"><img class="brand-logo" src="assets/yws-logo-white.png" alt="Yavapai Waste Solutions" width="900" height="690"></a>
+<div class="nav-cta">
+<a class="nav-tel" href="tel:+19287132710" aria-label="Call (928) 713-2710"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-phone" fill="currentColor"/></svg><span>(928) 713-2710</span></a>
+<a class="nav-link" href="https://app.trashlab.com/customer-portal/login?orgId=0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="portal">Pay My Bill</a>
+<a class="btn primary" href="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="book">Book Online</a>
+</div>
+</nav>
+<main id="main">
+<section class="hero" id="top" aria-label="Yavapai Waste Solutions, Prescott area">
+<div class="sky" aria-hidden="true">
+<div class="sun"></div>
+<svg class="cloud c1" viewBox="0 0 240 80"><g fill="#F6DDC4"><ellipse cx="70" cy="52" rx="60" ry="17"/><ellipse cx="122" cy="38" rx="46" ry="15"/><ellipse cx="172" cy="54" rx="54" ry="15"/></g></svg>
+<svg class="cloud c2" viewBox="0 0 240 80"><g fill="#F6DDC4"><ellipse cx="80" cy="50" rx="52" ry="14"/><ellipse cx="140" cy="40" rx="44" ry="13"/></g></svg>
+<svg class="hawk" viewBox="-30 -14 60 30"><path d="M-1.5,-6 L1.5,-6 L2.5,-3 C10,-4.5 19,-9 28,-8 C23,-2 13,3.5 3.5,3 L5.5,11 L0,13.5 L-5.5,11 L-3.5,3 C-13,3.5 -23,-2 -28,-8 C-19,-9 -10,-4.5 -2.5,-3 Z" fill="#1B2430"/></svg>
+<div class="mtn mtn-far"><svg viewBox="0 0 1440 320" preserveAspectRatio="none"><path fill="#55506B" opacity=".85" d="M0,320 L0,210 L90,150 L180,196 L260,120 L330,190 L420,160 L470,150 L495,150 L500,110 L520,100 L535,112 L540,150 L570,150 L640,200 L730,130 L820,190 L900,150 L1000,210 L1080,160 L1180,220 L1260,180 L1340,230 L1440,190 L1440,320 Z"/></svg></div>
+<div class="mtn mtn-near"><svg viewBox="0 0 1440 210" preserveAspectRatio="none">
+<path fill="#232E3F" d="M0,210 L0,120 Q30,80 70,110 Q82,60 130,86 Q170,50 200,96 Q240,110 260,90 L285,100 L300,58 L315,100 Q350,70 390,104 Q430,126 470,100 Q500,54 560,92 L595,98 L610,50 L625,98 Q670,70 720,108 Q760,130 800,104 Q840,66 900,98 L935,102 L950,56 L965,102 Q1010,74 1060,106 Q1100,124 1140,100 Q1180,60 1240,94 Q1290,116 1330,96 Q1380,74 1440,108 L1440,210 Z"/>
+<g fill="#1A222E"><path d="M120,210 l16,-44 16,44 z M124,182 l12,-32 12,32 z"/><path d="M180,210 l13,-36 13,36 z M184,188 l9,-26 9,26 z"/><path d="M620,210 l14,-40 14,40 z M624,184 l10,-28 10,28 z"/><path d="M1230,210 l16,-46 16,46 z M1234,180 l12,-34 12,34 z"/><path d="M1300,210 l12,-34 12,34 z M1303,190 l9,-24 9,24 z"/></g>
+</svg></div>
+</div>
+<div class="hero-grid">
+<div class="hero-copy">
+<img class="hero-logo" src="assets/yws-logo-white.png" alt="Yavapai Waste Solutions" width="900" height="690">
+<h1 class="hero-h" aria-label="Let's talk trash."><span class="mask" aria-hidden="true"><span class="word">Let&rsquo;s</span></span> <span class="mask" aria-hidden="true"><span class="word word-plate">Talk</span></span> <span class="mask" aria-hidden="true"><span class="word">Trash</span></span></h1>
+<p class="hero-sub">Roll-off and front-load bins across the Prescott area.</p>
+<div class="hero-ctas">
+<a class="btn primary btn-lg" href="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="book">Book Online</a>
+<a class="btn btn-lg" href="tel:+19287132710"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-phone"/></svg>Call (928) 713-2710</a>
+</div>
+</div>
+<div class="stage" aria-hidden="true">
+<svg class="stage-svg" viewBox="0 -24 1000 454">
+<g class="rig">
+<rect x="380" y="330" width="540" height="14" rx="4" fill="#2A3442"/>
+<g class="bed"><rect x="386" y="300" width="470" height="30" rx="4" fill="#39465C"/><rect x="386" y="300" width="470" height="8" rx="3" fill="#2A3442"/><rect x="400" y="312" width="440" height="6" rx="3" fill="#2A3442"/></g>
+<rect x="846" y="196" width="10" height="54" rx="4" fill="#39465C"/>
+<rect x="842" y="190" width="18" height="8" rx="3" fill="#2A3442"/>
+<path d="M860,340 L860,250 Q860,238 872,238 L940,238 Q952,238 958,248 L988,296 Q992,304 992,314 L992,340 Z" fill="#3D4A5E"/>
+<path d="M874,250 L936,250 Q944,250 949,258 L968,290 L874,290 Z" fill="#0E141D"/>
+<path d="M918,250 L880,290 L892,290 L930,250 Z" fill="rgba(245,241,232,.16)"/>
+<path d="M884,312 l10,-14 7,9 5,-6 10,11 z" fill="#F5F1E8"/>
+<circle cx="986" cy="308" r="5" fill="#FFE49A"/>
+<rect x="956" y="336" width="44" height="12" rx="5" fill="#39465C"/>
+<rect x="866" y="344" width="60" height="14" rx="6" fill="#2A3442"/>
+<g class="bin">
+<path d="M70,414 L86,254 L344,254 L360,414 Z" fill="#F5F1E8"/>
+<g fill="rgba(14,20,29,.12)"><rect x="128" y="266" width="11" height="136"/><rect x="290" y="266" width="11" height="136"/></g>
+<rect x="80" y="246" width="270" height="12" rx="3" fill="#D9D2C0"/>
+<rect x="76" y="400" width="278" height="9" fill="#2A3442"/>
+<circle cx="102" cy="410" r="7" fill="#2A3442"/><circle cx="330" cy="410" r="7" fill="#2A3442"/>
+<g class="decal" transform="rotate(-1.5 215 335)"><image href="assets/yws-logo-dark.png" x="141" y="278" width="148" height="113"/></g>
+<path class="lid" d="M351.9,235.5 L498.9,-19.1 L511.1,-12.1 L364.1,242.5 Z" fill="#D9D2C0"/>
+</g>
+<circle cx="470" cy="380" r="34" fill="#1D242E"/><g class="wheel" transform="translate(470 380)"><use href="#wheel-art"/></g>
+<circle cx="550" cy="380" r="34" fill="#1D242E"/><g class="wheel" transform="translate(550 380)"><use href="#wheel-art"/></g>
+<circle cx="940" cy="380" r="34" fill="#1D242E"/><g class="wheel" transform="translate(940 380)"><use href="#wheel-art"/></g>
+</g>
+</svg>
+</div>
+</div>
+<div class="road" aria-hidden="true"></div>
+</section>
+<section class="tape" aria-label="Yavapai Waste Solutions at a glance">
+<!-- A's phrases, minus "Let's Talk Trash" because the h1 now says it. Four copies of the group: the loop stays seamless on wide screens, the extra three are aria-hidden. -->
+<div class="tape-viewport"><div class="tape-track">
+<div class="tape-group"><span>10 / 15 / 20 / 30 yd roll-offs</span><b aria-hidden="true">&#9733;</b><span>Front-load 2 to 8 yd</span><b aria-hidden="true">&#9733;</b><span>Veteran-owned</span><b aria-hidden="true">&#9733;</b><span>Prescott area since 1994</span><b aria-hidden="true">&#9733;</b><span>A human answers</span><b aria-hidden="true">&#9733;</b></div>
+<div class="tape-group" aria-hidden="true"><span>10 / 15 / 20 / 30 yd roll-offs</span><b>&#9733;</b><span>Front-load 2 to 8 yd</span><b>&#9733;</b><span>Veteran-owned</span><b>&#9733;</b><span>Prescott area since 1994</span><b>&#9733;</b><span>A human answers</span><b>&#9733;</b></div>
+<div class="tape-group" aria-hidden="true"><span>10 / 15 / 20 / 30 yd roll-offs</span><b>&#9733;</b><span>Front-load 2 to 8 yd</span><b>&#9733;</b><span>Veteran-owned</span><b>&#9733;</b><span>Prescott area since 1994</span><b>&#9733;</b><span>A human answers</span><b>&#9733;</b></div>
+<div class="tape-group" aria-hidden="true"><span>10 / 15 / 20 / 30 yd roll-offs</span><b>&#9733;</b><span>Front-load 2 to 8 yd</span><b>&#9733;</b><span>Veteran-owned</span><b>&#9733;</b><span>Prescott area since 1994</span><b>&#9733;</b><span>A human answers</span><b>&#9733;</b></div>
+</div></div>
+<button class="tape-pause" type="button" aria-pressed="false">Pause</button>
+</section>
+<!-- SIZE SHOWCASE: a demonstration, not a booking step. No prices, no booking link in this section (the client's note). Booking is the page-wide Book Online in the nav and the hero. -->
+<section class="band on-cream" id="sizes" aria-labelledby="sz-title" data-sizes>
+<div class="wrap sz-grid">
+<div class="sz-copy">
+<div class="sec-head">
+<span class="kicker">Sizes</span>
+<h2 class="display" id="sz-title">Pick a size.</h2>
+<p class="lede">Roll-offs run 10 to 30 yards. Front-loads run 2 to 8.</p>
+</div>
+<fieldset>
+<legend class="sr">Bin type</legend>
+<div class="seg-ctl">
+<div class="seg-opt"><input type="radio" id="fam-ro" name="family" value="ro" checked><label for="fam-ro">Roll-off</label></div>
+<div class="seg-opt"><input type="radio" id="fam-fl" name="family" value="fl"><label for="fam-fl">Front-load</label></div>
+</div>
+</fieldset>
+<div class="tabs-wrap" data-tabs>
+<!-- HOLDS TBD: pickup-load and bag counts are estimates to confirm with the owner. -->
+<fieldset class="tabs" data-set="ro">
+<legend class="label">Roll-off dumpster</legend>
+<div class="pills big">
+<div class="pill"><input type="radio" id="ss-10" name="size-ro" value="ro-10" data-type="ro" data-yd="10" data-dims="12 x 8 x 3.5 ft" data-len="12 ft long" data-holds="Fits about 4 pickup loads" data-sx=".545" data-sy=".583"><label for="ss-10">10 yd<span class="sr">, 12 by 8 by 3.5 feet, about 4 pickup loads</span></label></div>
+<div class="pill"><input type="radio" id="ss-15" name="size-ro" value="ro-15" data-type="ro" data-yd="15" data-dims="14 x 8 x 4.5 ft" data-len="14 ft long" data-holds="Fits about 6 pickup loads" data-sx=".636" data-sy=".75"><label for="ss-15">15 yd<span class="sr">, 14 by 8 by 4.5 feet, about 6 pickup loads</span></label></div>
+<div class="pill"><input type="radio" id="ss-20" name="size-ro" value="ro-20" data-type="ro" data-yd="20" data-dims="16 x 8 x 5.5 ft" data-len="16 ft long" data-holds="Fits about 8 pickup loads" data-sx=".727" data-sy=".917"><label for="ss-20">20 yd<span class="sr">, 16 by 8 by 5.5 feet, about 8 pickup loads</span></label></div>
+<div class="pill"><input type="radio" id="ss-30" name="size-ro" value="ro-30" data-type="ro" data-yd="30" data-dims="22 x 8 x 6 ft" data-len="22 ft long" data-holds="Fits about 12 pickup loads" data-sx="1" data-sy="1" checked><label for="ss-30">30 yd<span class="sr">, 22 by 8 by 6 feet, about 12 pickup loads</span></label></div>
+</div>
+</fieldset>
+<fieldset class="tabs" data-set="fl">
+<legend class="label">Front-load bin</legend>
+<div class="pills big">
+<div class="pill"><input type="radio" id="ss-2" name="size-fl" value="fl-2" data-type="fl" data-yd="2" data-dims="6 x 3 x 3 ft" data-len="3 ft deep" data-holds="Holds about 12 bags" data-sx=".5" data-sy=".429"><label for="ss-2">2 yd<span class="sr">, 6 by 3 by 3 feet, about 12 bags</span></label></div>
+<div class="pill"><input type="radio" id="ss-3" name="size-fl" value="fl-3" data-type="fl" data-yd="3" data-dims="6 x 3.5 x 4 ft" data-len="3.5 ft deep" data-holds="Holds about 18 bags" data-sx=".583" data-sy=".571"><label for="ss-3">3 yd<span class="sr">, 6 by 3.5 by 4 feet, about 18 bags</span></label></div>
+<div class="pill"><input type="radio" id="ss-4" name="size-fl" value="fl-4" data-type="fl" data-yd="4" data-dims="6 x 4.5 x 4.5 ft" data-len="4.5 ft deep" data-holds="Holds about 24 bags" data-sx=".75" data-sy=".643" checked><label for="ss-4">4 yd<span class="sr">, 6 by 4.5 by 4.5 feet, about 24 bags</span></label></div>
+<div class="pill"><input type="radio" id="ss-6" name="size-fl" value="fl-6" data-type="fl" data-yd="6" data-dims="6 x 5.5 x 6 ft" data-len="5.5 ft deep" data-holds="Holds about 36 bags" data-sx=".917" data-sy=".857"><label for="ss-6">6 yd<span class="sr">, 6 by 5.5 by 6 feet, about 36 bags</span></label></div>
+<div class="pill"><input type="radio" id="ss-8" name="size-fl" value="fl-8" data-type="fl" data-yd="8" data-dims="6 x 6 x 7 ft" data-len="6 ft deep" data-holds="Holds about 48 bags" data-sx="1" data-sy="1"><label for="ss-8">8 yd<span class="sr">, 6 by 6 by 7 feet, about 48 bags</span></label></div>
+</div>
+</fieldset>
+</div>
+</div>
+<figure class="scene-card scene">
+<!-- Side view at 12 px per foot. Ground line fixed at y=140. Bins scale from their bottom edge (the component's visualizer). -->
+<svg viewBox="0 0 700 168" role="img" aria-labelledby="scene-title" data-scene>
+<title id="scene-title">Side view of the bin next to a person and a pickup truck for scale</title>
+<line class="ground" x1="0" y1="140.5" x2="700" y2="140.5"/>
+<g fill="currentColor" data-human><circle cx="34" cy="76" r="7"/><rect x="27" y="85" width="14" height="27" rx="4"/><rect x="21" y="87" width="5" height="24" rx="2.5"/><rect x="42" y="87" width="5" height="24" rx="2.5"/><rect x="27" y="110" width="6" height="30" rx="2"/><rect x="35" y="110" width="6" height="30" rx="2"/></g>
+<text class="tag" x="34" y="160" text-anchor="middle">6 ft</text>
+<g fill="currentColor" data-truck><path d="M70 122V98q0-6 6-6h50l16-24h52q6 0 6 6v26h98v22z"/><path class="p" d="M138 92l12-18h40v18z" opacity=".9"/><circle cx="108" cy="128" r="13"/><circle class="p" cx="108" cy="128" r="5"/><circle cx="262" cy="128" r="13"/><circle class="p" cx="262" cy="128" r="5"/></g>
+<text class="tag" x="184" y="160" text-anchor="middle">Pickup, 19 ft</text>
+<g fill="currentColor" data-bin="ro"><rect x="320" y="68" width="264" height="64" rx="2"/><rect x="316" y="63" width="272" height="6" rx="1"/><rect x="328" y="132" width="248" height="8" rx="1"/><g class="p" opacity=".3"><rect x="358" y="74" width="4" height="52"/><rect x="396" y="74" width="4" height="52"/><rect x="434" y="74" width="4" height="52"/><rect x="472" y="74" width="4" height="52"/><rect x="510" y="74" width="4" height="52"/><rect x="548" y="74" width="4" height="52"/></g><rect class="p" x="576" y="72" width="3" height="56" opacity=".45"/><circle class="p" cx="566" cy="136" r="3" opacity=".6"/></g>
+<text class="tag" x="452" y="160" text-anchor="middle" data-bin-label>22 ft long</text>
+<g fill="currentColor" data-bin="fl"><path d="M610 84L682 60V132H610z"/><path d="M606 86L684 60" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/><rect class="p" x="606" y="108" width="80" height="6" opacity=".45"/><circle cx="619" cy="136" r="4"/><circle cx="673" cy="136" r="4"/></g>
+<text class="tag" x="646" y="160" text-anchor="middle" data-bin-tag="fl">Front-load</text>
+</svg>
+<figcaption class="spec"><span class="yd" data-yd>30 yard</span><span class="dims" data-dims>22 x 8 x 6 ft</span><span class="fits" data-fits>Fits about 12 pickup loads</span></figcaption>
+</figure>
+</div>
+</section>
+<section class="band on-cream" id="services" aria-labelledby="svc-title">
+<div class="wrap">
+<div class="sec-head">
+<span class="kicker">Services</span>
+<h2 class="display" id="svc-title">What we haul.</h2>
+</div>
+<ul class="svc-grid">
+<!-- TURNAROUND TBD: confirm the real delivery window with the owner. -->
+<li class="svc"><span class="svc-ic" aria-hidden="true"><svg viewBox="0 0 48 48"><use href="#ic-roll"/></svg></span><h3>Roll-off rentals</h3><p>10 to 30 yards, dropped in your driveway next business day.</p></li>
+<li class="svc"><span class="svc-ic" aria-hidden="true"><svg viewBox="0 0 48 48"><use href="#ic-front"/></svg></span><h3>Front-load service</h3><p>2 to 8 yard bins on a weekly to monthly route.</p></li>
+<li class="svc"><span class="svc-ic" aria-hidden="true"><svg viewBox="0 0 48 48"><use href="#ic-build"/></svg></span><h3>Construction bins</h3><p>Debris, roofing, drywall, with a swap when the crew fills it.</p></li>
+</ul>
+</div>
+</section>
+<div class="dv" aria-hidden="true" style="--a:var(--cream);--b:var(--navy)"><svg viewBox="0 0 1440 80" preserveAspectRatio="none"><use href="#shape-dells"/></svg></div>
+<section class="band on-navy trust" id="trust" aria-label="Why Yavapai Waste Solutions">
+<div class="wrap trust-row">
+<div class="patch">
+<svg viewBox="0 0 132 132" aria-hidden="true">
+<circle cx="66" cy="66" r="62" fill="#0B0D11"/><circle cx="66" cy="66" r="54" fill="none" stroke="#F5F1E8" stroke-width="2.5"/>
+<path d="M66,58 L72.2,70.6 L86,72.6 L76,82.4 L78.4,96.2 L66,89.7 L53.6,96.2 L56,82.4 L46,72.6 L59.8,70.6 Z" fill="#F5F1E8"/>
+<text font-family="Inter,sans-serif" font-size="12.5" font-weight="700" letter-spacing="2" fill="#F5F1E8"><textPath href="#arc" startOffset="50%" text-anchor="middle">VETERAN-OWNED</textPath></text>
+<text x="66" y="114" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" letter-spacing="2" fill="#8D8D93">EST. 1994</text>
+</svg>
+<b>Veteran-owned</b>
+</div>
+<div class="patch">
+<svg viewBox="0 0 132 132" aria-hidden="true">
+<circle cx="66" cy="66" r="62" fill="#1B2430"/><circle cx="66" cy="66" r="54" fill="none" stroke="#F5F1E8" stroke-width="2.5"/>
+<path d="M36,88 L56,56 L66,70 L76,52 L98,88 Z" fill="#F5F1E8"/><circle cx="88" cy="52" r="7" fill="#F5F1E8" opacity=".6"/>
+<text font-family="Inter,sans-serif" font-size="13" font-weight="700" letter-spacing="2.4" fill="#F5F1E8"><textPath href="#arc" startOffset="50%" text-anchor="middle">32 YEARS</textPath></text>
+<text x="66" y="108" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" font-weight="700" letter-spacing="1.8" fill="#8D8D93">PRESCOTT AREA</text>
+</svg>
+<b>32 years local</b>
+</div>
+<div class="patch">
+<svg viewBox="0 0 132 132" aria-hidden="true">
+<circle cx="66" cy="66" r="62" fill="#F5F1E8"/><circle cx="66" cy="66" r="54" fill="none" stroke="#0B0D11" stroke-width="2.5"/>
+<text x="66" y="56" text-anchor="middle" font-family="Bricolage Grotesque,Inter,sans-serif" font-size="24" font-weight="800" fill="#0B0D11">SBA</text>
+<text x="66" y="72" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" letter-spacing="3" fill="#0B0D11">CERTIFICATION</text>
+<rect x="20" y="80" width="92" height="18" rx="9" fill="#0B0D11"/>
+<text x="66" y="93" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" letter-spacing="2" fill="#F5F1E8">IN PROGRESS</text>
+</svg>
+<b>SBA certification in progress</b>
+</div>
+</div>
+</section>
+<!-- QUOTE: one at a time. PLACEHOLDER REVIEWS: the quotes here and in the script are invented examples for layout only.
+Replace with real, permissioned customer quotes before launch. -->
+<section class="band on-navy quote" id="quote" aria-labelledby="q-title" data-quote>
+<div class="wrap quote-in">
+<h2 class="sr" id="q-title">What neighbors say</h2>
+<span class="kicker">Neighbors say</span>
+<blockquote data-qt>Booked at 10pm, bin was in the driveway before my coffee.</blockquote>
+<p class="qcite" data-qc>Dana, Prescott Valley</p>
+<div class="qdots" role="group" aria-label="Choose a quote">
+<button type="button" class="qdot" data-qdot aria-current="true" aria-label="Quote 1"></button>
+<button type="button" class="qdot" data-qdot aria-current="false" aria-label="Quote 2"></button>
+<button type="button" class="qdot" data-qdot aria-current="false" aria-label="Quote 3"></button>
+</div>
+</div>
+</section>
+<div class="dv" aria-hidden="true" style="--a:var(--navy-deep);--b:var(--cream)"><svg viewBox="0 0 1440 80" preserveAspectRatio="none"><use href="#shape-hills"/></svg></div>
+<section class="band on-cream" id="area" aria-labelledby="area-title">
+<div class="wrap area-grid">
+<div class="area-copy">
+<div class="sec-head">
+<span class="kicker">Service area</span>
+<h2 class="display" id="area-title">Where we roll.</h2>
+<p class="lede">Tap your town for a callback.</p>
+</div>
+<ul class="towns" aria-label="Towns we serve">
+<li><button type="button" class="town" data-town="prescott">Prescott</button></li>
+<li><button type="button" class="town" data-town="prescott-valley">Prescott Valley</button></li>
+<li><button type="button" class="town" data-town="chino-valley">Chino Valley</button></li>
+<li><button type="button" class="town" data-town="paulden">Paulden</button></li>
+<li><button type="button" class="town" data-town="cordes-junction">Cordes Junction</button></li>
+<li><button type="button" class="town" data-town="williamson-valley">Williamson Valley</button></li>
+<li><button type="button" class="town" data-town="dewey">Dewey</button></li>
+<li><button type="button" class="town" data-town="humboldt">Humboldt</button></li>
+</ul>
+<p class="area-note">Outside the lines? <a href="tel:+19287132710">Call (928) 713-2710</a>.</p>
+</div>
+<div class="area-map">
+<svg class="map" viewBox="0 0 600 460" role="group" aria-label="Map of the eight towns we serve" data-map>
+<rect width="600" height="460" fill="#EDE8DA"/>
+<path d="M0,300 L70,230 L130,270 L200,200 L260,250 L330,210 L400,262 L470,220 L540,262 L600,236 L600,460 L0,460 Z" fill="#DDD6C2"/>
+<path d="M300,58 L296,130 Q290,180 250,210 Q210,240 240,300 L380,282 L470,320 L512,352 L560,420" fill="none" stroke="#F5F1E8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M300,58 L296,130 Q290,180 250,210 Q210,240 240,300 L380,282 L470,320 L512,352 L560,420" fill="none" stroke="#1B2430" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M120,190 Q180,230 240,300" fill="none" stroke="#8D8D93" stroke-width="3" stroke-linecap="round"/>
+<path d="M60,90 l16,-28 16,28 z" fill="#8D8D93"/><path d="M70,80 l10,-18 10,18 z" fill="#8D8D93"/>
+<text x="40" y="118" font-family="Inter,sans-serif" font-size="11" font-weight="500" letter-spacing="2" fill="#8D8D93">GRANITE DELLS</text>
+<g class="pin" data-town="paulden" data-name="Paulden" data-x="300" data-y="58" tabindex="0" role="button" aria-label="Callback in Paulden"><circle cx="300" cy="58" r="26" fill="transparent"/><circle class="dot" cx="300" cy="58" r="8"/><text x="316" y="63">Paulden</text></g>
+<g class="pin" data-town="chino-valley" data-name="Chino Valley" data-x="296" data-y="130" tabindex="0" role="button" aria-label="Callback in Chino Valley"><circle cx="296" cy="130" r="26" fill="transparent"/><circle class="dot" cx="296" cy="130" r="8"/><text x="312" y="135">Chino Valley</text></g>
+<g class="pin" data-town="williamson-valley" data-name="Williamson Valley" data-x="120" data-y="190" tabindex="0" role="button" aria-label="Callback in Williamson Valley"><circle cx="120" cy="190" r="26" fill="transparent"/><circle class="dot" cx="120" cy="190" r="8"/><text x="14" y="176">Williamson Valley</text></g>
+<g class="pin hub" data-town="prescott" data-name="Prescott" data-x="240" data-y="300" tabindex="0" role="button" aria-label="Callback in Prescott"><circle cx="240" cy="300" r="26" fill="transparent"/><circle class="dot" cx="240" cy="300" r="11"/><text x="146" y="332" font-size="21">Prescott</text></g>
+<g class="pin" data-town="prescott-valley" data-name="Prescott Valley" data-x="380" data-y="282" tabindex="0" role="button" aria-label="Callback in Prescott Valley"><circle cx="380" cy="282" r="26" fill="transparent"/><circle class="dot" cx="380" cy="282" r="8"/><text x="356" y="266">Prescott Valley</text></g>
+<g class="pin" data-town="dewey" data-name="Dewey" data-x="470" data-y="320" tabindex="0" role="button" aria-label="Callback in Dewey"><circle cx="470" cy="320" r="26" fill="transparent"/><circle class="dot" cx="470" cy="320" r="8"/><text x="486" y="316">Dewey</text></g>
+<g class="pin" data-town="humboldt" data-name="Humboldt" data-x="512" data-y="352" tabindex="0" role="button" aria-label="Callback in Humboldt"><circle cx="512" cy="352" r="26" fill="transparent"/><circle class="dot" cx="512" cy="352" r="8"/><text x="526" y="358">Humboldt</text></g>
+<g class="pin" data-town="cordes-junction" data-name="Cordes Junction" data-x="560" data-y="420" tabindex="0" role="button" aria-label="Callback in Cordes Junction"><circle cx="560" cy="420" r="26" fill="transparent"/><circle class="dot" cx="560" cy="420" r="8"/><text x="412" y="446">Cordes Junction</text></g>
+<g class="callout" aria-hidden="true"><rect x="-80" y="-48" width="160" height="30" rx="15"/><path d="M-7,-18 L0,-10 L7,-18 Z"/><text y="-27" text-anchor="middle">Callback in Prescott</text></g>
+</svg>
+</div>
+</div>
+</section>
+<div class="dv" aria-hidden="true" style="--a:var(--cream);--b:var(--navy)"><svg viewBox="0 0 1440 80" preserveAspectRatio="none"><use href="#shape-dells"/></svg></div>
+<!-- CALLBACK: the Get a Bin component reduced to service, town, name and phone. Sizes live in the showcase above. ENDPOINT TBD: the plain form posts without JS; with JS the submit is intercepted and simulated. -->
+<section class="band on-navy" id="callback" aria-labelledby="cb-title">
+<div class="wrap cb-grid">
+<div class="cb-copy">
+<span class="kicker">Prefer a callback?</span>
+<h2 class="display" id="cb-title">We call you.</h2>
+<p class="lede">Two taps and your number. A human calls back within the hour, Mon to Fri 8 to 5.</p>
+</div>
+<section class="flow-wrap" id="get-a-bin" aria-labelledby="flow-title" data-flow>
+<form class="flow" method="post" action="/api/lead">
+<div class="flow-head">
+<h3 class="kicker flow-kicker" id="flow-title">Request a callback</h3>
+<div class="rail-row">
+<div class="rail" role="progressbar" aria-label="Callback request progress" aria-valuemin="0" aria-valuemax="3" aria-valuenow="1" aria-valuetext="Step 1 of 3">
+<span class="seg is-current"><i class="fill"></i></span>
+<span class="seg"><i class="fill"></i></span>
+<span class="seg"><i class="fill"></i></span>
+</div>
+<span class="counter" aria-hidden="true" data-counter>Step 1 of 3</span>
+</div>
+<div class="chips" data-chips><p class="chips-empty" data-chips-empty>Your picks show here.</p></div>
+<p class="sr" aria-live="polite" data-announce></p>
+</div>
+<div class="steps">
+<section class="step" data-step="1" aria-labelledby="q1">
+<div class="step-top" data-anim><h4 class="q" id="q1" tabindex="-1">What&rsquo;s it for?</h4></div>
+<fieldset class="tiles">
+<legend class="sr">What is the bin for?</legend>
+<div class="tile" data-anim><input type="radio" id="svc-home" name="service" value="home" data-label="Home cleanout" data-chip="Home" required><label for="svc-home" data-advance><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span><b>Home cleanout</b><small>Garage, move, junk</small></span></label></div>
+<div class="tile" data-anim><input type="radio" id="svc-construction" name="service" value="construction" data-label="Construction or remodel" data-chip="Construction"><label for="svc-construction" data-advance><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4l6 6-2 2-6-6zM12 6L3 15l3 3 9-9"/></svg><span><b>Construction or remodel</b><small>Debris, roofing, drywall</small></span></label></div>
+<div class="tile" data-anim><input type="radio" id="svc-business" name="service" value="business" data-label="Business pickup" data-chip="Business"><label for="svc-business" data-advance><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M9 20v-6h6v6"/></svg><span><b>Business pickup</b><small>Regular pickups, front-load</small></span></label></div>
+<div class="tile" data-anim><input type="radio" id="svc-other" name="service" value="other" data-label="Something else" data-chip="Other"><label for="svc-other" data-advance><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7M12 17h.01"/></svg><span><b>Something else</b><small>Tell us on the call</small></span></label></div>
+</fieldset>
+<p class="hint" data-hint id="hint-1" aria-live="polite"></p>
+<div class="actions" data-next-row><button type="button" class="btn primary" data-next>Next</button></div>
+</section>
+<section class="step" data-step="2" aria-labelledby="q2">
+<div class="step-top" data-anim><button type="button" class="back" data-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Back</button><h4 class="q" id="q2" tabindex="-1">Which town?</h4></div>
+<fieldset data-anim>
+<legend class="sr">Town</legend>
+<div class="pills">
+<div class="pill"><input type="radio" id="tn-prescott" name="town" value="prescott" data-label="Prescott" required><label for="tn-prescott" data-advance>Prescott</label></div>
+<div class="pill"><input type="radio" id="tn-prescott-valley" name="town" value="prescott-valley" data-label="Prescott Valley"><label for="tn-prescott-valley" data-advance>Prescott Valley</label></div>
+<div class="pill"><input type="radio" id="tn-chino-valley" name="town" value="chino-valley" data-label="Chino Valley"><label for="tn-chino-valley" data-advance>Chino Valley</label></div>
+<div class="pill"><input type="radio" id="tn-paulden" name="town" value="paulden" data-label="Paulden"><label for="tn-paulden" data-advance>Paulden</label></div>
+<div class="pill"><input type="radio" id="tn-cordes-junction" name="town" value="cordes-junction" data-label="Cordes Junction"><label for="tn-cordes-junction" data-advance>Cordes Junction</label></div>
+<div class="pill"><input type="radio" id="tn-williamson-valley" name="town" value="williamson-valley" data-label="Williamson Valley"><label for="tn-williamson-valley" data-advance>Williamson Valley</label></div>
+<div class="pill"><input type="radio" id="tn-dewey" name="town" value="dewey" data-label="Dewey"><label for="tn-dewey" data-advance>Dewey</label></div>
+<div class="pill"><input type="radio" id="tn-humboldt" name="town" value="humboldt" data-label="Humboldt"><label for="tn-humboldt" data-advance>Humboldt</label></div>
+<div class="pill"><input type="radio" id="tn-other" name="town" value="other" data-label="Town not listed" data-chip="Other town" data-recap="town not listed"><label for="tn-other" data-advance>Not listed</label></div>
+</div>
+</fieldset>
+<p class="hint" data-hint id="hint-2" aria-live="polite"></p>
+<div class="actions" data-next-row><button type="button" class="btn primary" data-next>Next</button></div>
+</section>
+<section class="step" data-step="3" aria-labelledby="q3">
+<div class="step-top" data-anim><button type="button" class="back" data-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Back</button><h4 class="q" id="q3" tabindex="-1">Who do we call?</h4></div>
+<div class="fields" data-fields>
+<div class="field" data-anim><label class="label" for="yws-name">Name</label><input class="input" type="text" id="yws-name" name="name" autocomplete="name" enterkeyhint="next" aria-describedby="hint-3" required></div>
+<div class="field" data-anim><label class="label" for="yws-phone">Phone</label><input class="input" type="tel" id="yws-phone" name="phone" autocomplete="tel" inputmode="tel" enterkeyhint="done" aria-describedby="hint-3" required></div>
+<p class="hint" data-hint id="hint-3" aria-live="polite"></p>
+<div class="actions who" data-anim>
+<button type="submit" class="btn primary" data-submit>Call me back</button>
+<p class="alt">Rather talk? <a href="tel:+19287132710">Call (928) 713-2710</a></p>
+</div>
+</div>
+<div data-done></div>
+<template id="yws-done-tpl">
+<div class="done" role="status" tabindex="-1" data-done-card>
+<p class="done-msg" data-anim>A human calls within the hour, Mon to Fri 8 to 5.</p>
+<p class="done-recap" data-recap data-anim></p>
+<a class="btn" href="tel:+19287132710" data-anim>Call (928) 713-2710</a>
+</div>
+</template>
+</section>
+</div>
+</form>
+</section>
+</div>
+</section>
+<div class="dv" aria-hidden="true" style="--a:var(--navy);--b:var(--navy-ink)"><svg viewBox="0 0 1440 80" preserveAspectRatio="none"><use href="#shape-hills"/></svg></div>
+</main>
+<footer id="pay" aria-label="Contact and billing">
+<div class="foot">
+<div class="foot-brand">
+<a class="brand" href="#top"><img class="foot-logo" src="assets/yws-logo-white.png" alt="Yavapai Waste Solutions" width="900" height="690"></a>
+<p class="foot-note">Prescott, Arizona. Veteran-owned.</p>
+</div>
+<ul class="foot-list">
+<li><a href="tel:+19287132710">(928) 713-2710</a></li>
+<li><a href="mailto:sales@ywsaz.com">sales@ywsaz.com</a></li>
+<li>Mon to Fri, 8 to 5</li>
+</ul>
+<div class="foot-bill">
+<a class="btn" href="https://app.trashlab.com/customer-portal/login?orgId=0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="portal">Pay My Bill</a>
+<p class="foot-note">Opens the TrashLab portal in a new tab.</p>
+</div>
+</div>
+<div class="foot-bottom">
+<span>&copy; 2026 Yavapai Waste Solutions</span>
+<span>Mockup direction A+B: merged</span>
+</div>
+</footer>
+<div class="mini" data-mini>
+<a class="mini-tel" href="tel:+19287132710"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-phone" fill="currentColor"/></svg>(928) 713-2710</a>
+<a class="btn primary" href="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" data-trashlab="book">Book Online</a>
+</div>
+<!-- TRASHLAB BOOK ONLINE (components/trashlab-booknow.html): the shop framed on this page. Inert markup without JS (the Book Online links open the shop in a new tab); the iframe src is assigned on first open. -->
+<div class="tlb" id="trashlab-book" hidden>
+<div class="tlb-overlay" data-tlb-overlay></div>
+<div class="tlb-dialog" role="dialog" aria-modal="true" aria-labelledby="tlb-title" tabindex="-1">
+<span class="tlb-sentinel" tabindex="0" data-tlb-sentinel="start"></span>
+<div class="tlb-head">
+<img class="tlb-icon" src="assets/yws-icon-128.png" alt="" width="128" height="128">
+<h2 class="tlb-title" id="tlb-title">Book online</h2>
+<a class="tlb-newtab" href="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d" target="_blank" rel="noopener" aria-label="Open in a new tab">
+<span class="tlb-newtab-long">Open in a new tab</span><span class="tlb-newtab-short">New tab</span>
+<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6 3H3.5A1.5 1.5 0 0 0 2 4.5v8A1.5 1.5 0 0 0 3.5 14h8a1.5 1.5 0 0 0 1.5-1.5V10M9 2h5v5M14 2 7 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</a>
+<button class="tlb-close" type="button" aria-label="Close">
+<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M3 3l12 12M15 3 3 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+</button>
+</div>
+<div class="tlb-body">
+<iframe class="tlb-frame" title="TrashLab online ordering" allow="payment" data-src="https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d"></iframe>
+<div class="tlb-loading" role="status" aria-live="polite">
+<span class="tlb-spinner" aria-hidden="true"></span>
+<span>Loading TrashLab</span>
+</div>
+</div>
+<p class="tlb-note">Orders and payments are handled securely by TrashLab.</p>
+<span class="tlb-sentinel" tabindex="0" data-tlb-sentinel="end"></span>
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.15.0/ScrollTrigger.min.js"></script>
+<script>
+/* ---------- Size showcase: the Get a Bin visualizer (scene SVG plus spring tween) as a standalone demo. No prices, no booking. ---------- */
+(function () {
+'use strict';
+var box = document.querySelector('[data-sizes]');
+if (!box || typeof gsap === 'undefined') return;
+var motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var D = function (s) { return motion ? s : 0; };
+var scene = box.querySelector('[data-scene]');
+var bins = { ro: scene.querySelector('[data-bin="ro"]'), fl: scene.querySelector('[data-bin="fl"]') };
+var binLabel = scene.querySelector('[data-bin-label]');
+var card = box.querySelector('.scene-card');
+/* scoped to the card: the pill inputs carry data-yd and data-dims too, and a box-wide query found those first, so the caption never updated */
+var spec = { yd: card.querySelector('[data-yd]'), dims: card.querySelector('[data-dims]'), fits: card.querySelector('[data-fits]') };
+var sets = { ro: box.querySelector('[data-set="ro"]'), fl: box.querySelector('[data-set="fl"]') };
+var tabsWrap = box.querySelector('[data-tabs]');
+var FL_X = -194;
+var fam = 'ro', current = { ro: 'ro-30', fl: 'fl-4' };
+/* a hover preview waits 70 ms so a sweep across the pills shows only where the pointer rests */
+var armed = null;
+function disarm() { if (armed) { armed.kill(); armed = null; } }
+function input(key) { return box.querySelector('input[data-type][value="' + key + '"]'); }
+function data(key) {
+var i = input(key); if (!i) return null;
+return { key: key, type: i.dataset.type, yd: i.dataset.yd, dims: i.dataset.dims, len: i.dataset.len, holds: i.dataset.holds, sx: +i.dataset.sx, sy: +i.dataset.sy };
+}
+function labelFor(i) { return box.querySelector('label[for="' + i.id + '"]'); }
+function pop(el) {
+if (!el) return;
+gsap.killTweensOf(el, 'scale');
+gsap.timeline().to(el, { scale: 1.04, duration: D(0.12), ease: 'power2.out' }).to(el, { scale: 1, duration: D(0.26), ease: 'back.out(1.6)' });
+}
+/* the bin settles from its bottom edge with a short overshoot, ground line fixed. A hover preview marks the card (the 'Shown' kicker in its corner) and swaps every label at once, without the fade. */
+function morph(key, instant, preview) {
+var d = data(key); if (!d) return;
+gsap.to(bins[d.type], { scaleX: d.sx, scaleY: d.sy, duration: instant ? 0 : D(0.55), ease: 'back.out(1.4)', overwrite: 'auto' });
+if (preview) card.setAttribute('data-preview', ''); else card.removeAttribute('data-preview');
+var yd = d.yd + ' yard';
+if (spec.yd.textContent !== yd || spec.dims.textContent !== d.dims) {
+spec.yd.textContent = yd; spec.dims.textContent = d.dims; spec.fits.textContent = d.holds; binLabel.textContent = d.len;
+var labels = [spec.yd, spec.dims, spec.fits, binLabel];
+if (!instant && !preview) gsap.fromTo(labels, { y: 6, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: D(0.3), ease: 'power3.out', stagger: D(0.04), overwrite: 'auto' });
+else gsap.set(labels, { y: 0, autoAlpha: 1, overwrite: 'auto' });
+}
+}
+function setFamily(t, instant) {
+var o = t === 'ro' ? 'fl' : 'ro';
+disarm();
+fam = t;
+sets[t].removeAttribute('data-off'); sets[t].inert = false;
+sets[o].setAttribute('data-off', ''); sets[o].inert = true;
+gsap.to(bins[o], { autoAlpha: 0, duration: instant ? 0 : D(0.2), overwrite: 'auto' });
+gsap.to(bins[t], { autoAlpha: 1, duration: instant ? 0 : D(0.3), overwrite: 'auto' });
+morph(current[t], instant);
+}
+scene.setAttribute('viewBox', '0 0 600 168');
+gsap.set(bins.ro, { transformOrigin: '50% 100%' });
+gsap.set(bins.fl, { x: FL_X, autoAlpha: 0, transformOrigin: '50% 100%' });
+/* the shared label under the bin names either family once the viewBox narrows; the no-JS front-load tag would otherwise peek in at the right edge on phones */
+gsap.set(scene.querySelector('[data-bin-tag="fl"]'), { autoAlpha: 0 });
+var f = box.querySelector('input[name="family"]:checked'); if (f) fam = f.value;
+['ro', 'fl'].forEach(function (t) { var c = sets[t].querySelector('input:checked'); if (c) current[t] = c.value; });
+setFamily(fam, true);
+box.addEventListener('change', function (e) {
+var t = e.target;
+if (t.name === 'family') { setFamily(t.value); return; }
+if (t.dataset.type) { disarm(); current[t.dataset.type] = t.value; morph(t.value); pop(labelFor(t)); }
+});
+gsap.matchMedia().add('(hover: hover) and (pointer: fine)', function () {
+var over = function (e) {
+var lab = e.target.closest('label[for]'); if (!lab) return;
+var i = document.getElementById(lab.htmlFor);
+if (!i || i.dataset.type !== fam) return;
+disarm();
+if (i.value === current[fam]) { morph(i.value); return; }
+armed = gsap.delayedCall(0.07, function () { armed = null; morph(i.value, false, true); });
+};
+var leave = function () { disarm(); morph(current[fam]); };
+var liftIn = function (e) { var lab = e.target.closest('.pill label'); if (lab && !lab.contains(e.relatedTarget)) gsap.to(lab, { y: -3, duration: D(0.3), ease: 'back.out(3)', overwrite: 'auto' }); };
+var liftOut = function (e) { var lab = e.target.closest('.pill label'); if (lab && !lab.contains(e.relatedTarget)) gsap.to(lab, { y: 0, duration: D(0.35), ease: 'back.out(2)', overwrite: 'auto' }); };
+tabsWrap.addEventListener('mouseover', over); tabsWrap.addEventListener('mouseleave', leave);
+tabsWrap.addEventListener('mouseover', liftIn); tabsWrap.addEventListener('mouseout', liftOut);
+return function () {
+disarm();
+tabsWrap.removeEventListener('mouseover', over); tabsWrap.removeEventListener('mouseleave', leave);
+tabsWrap.removeEventListener('mouseover', liftIn); tabsWrap.removeEventListener('mouseout', liftOut);
+};
+});
+})();
+/* ---------- Callback flow: the Get a Bin component (mockups/components/get-a-bin.html) reduced to service, town, name and phone.
+State machine, YWSFlow API and the measured height glide are kept; the size step and the estimate are gone (sizes live in the showcase). ---------- */
+(function () {
+'use strict';
+var root = document.querySelector('[data-flow]');
+if (!root || typeof gsap === 'undefined') { document.documentElement.classList.remove('js'); return; }
+var motion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var D = function (s) { return motion ? s : 0; };
+var mm = gsap.matchMedia();
+mm.add('(prefers-reduced-motion: reduce)', function () { motion = false; return function () { motion = true; }; });
+var coarse = window.matchMedia('(pointer: coarse)').matches;
+var form = root.querySelector('form');
+var stepsBox = root.querySelector('.steps');
+var steps = Array.prototype.slice.call(root.querySelectorAll('.step'));
+var N = steps.length;
+var segs = Array.prototype.slice.call(root.querySelectorAll('.seg'));
+var fills = segs.map(function (s) { return s.querySelector('.fill'); });
+var rail = root.querySelector('.rail');
+var counter = root.querySelector('[data-counter]');
+var announce = root.querySelector('[data-announce]');
+var chipsBox = root.querySelector('[data-chips]');
+var chipsEmpty = root.querySelector('[data-chips-empty]');
+var nameEl = root.querySelector('#yws-name');
+var phoneEl = root.querySelector('#yws-phone');
+var submitBtn = root.querySelector('[data-submit]');
+var submitLabel = submitBtn.textContent;
+var fieldsBox = root.querySelector('[data-fields]');
+var doneSlot = root.querySelector('[data-done]');
+var tpl = root.querySelector('#yws-done-tpl');
+var nextRows = steps.map(function (s) { return s.querySelector('[data-next-row]'); });
+var state = { step: 1, service: null, town: null, name: '', phone: '', sent: false };
+var TEL = '(928) 713-2710', TEL_HREF = 'tel:+19287132710';
+/* ENDPOINT TBD: SIMULATE fakes the POST for the mockup. Set it to false once form.action exists. */
+var ENDPOINT = form.getAttribute('action');
+var SIMULATE = true;
+var advanceIntent = null, moving = null, pending = null, sending = false, entered = false;
+function radio(name, value) { return form.querySelector('input[name="' + name + '"][value="' + value + '"]'); }
+function checkedRadio(name) { return form.querySelector('input[name="' + name + '"]:checked'); }
+function labelFor(input) { return form.querySelector('label[for="' + input.id + '"]'); }
+function townData(key) {
+var i = radio('town', key); if (!i) return null;
+return { key: key, name: i.dataset.label, chip: i.dataset.chip || i.dataset.label, recap: i.dataset.recap || i.dataset.label };
+}
+function firstName(s) { var f = String(s || '').trim().split(/\s+/)[0] || ''; return f.length <= 20 ? f : ''; }
+function hint(n, text, html) { var el = steps[n - 1].querySelector('[data-hint]'); if (!el) return; if (html) el.innerHTML = html; else el.textContent = text || ''; if (n === state.step && !moving) settleHeight(); }
+function stepValue(n) { return n === 1 ? state.service : n === 2 ? state.town : null; }
+function schedule(delay, fn) { if (pending) pending.kill(); pending = gsap.delayedCall(delay, function () { pending = null; fn(); }); }
+function cancelPending() { if (pending) { pending.kill(); pending = null; } }
+function px(el, prop) { return parseFloat(getComputedStyle(el)[prop]) || 0; }
+/* computed heights, not rects, so the card's entrance scale cannot skew them; the box is border-box, so its padding rides along */
+function boxHeight(n) { return px(steps[n - 1], 'height') + px(stepsBox, 'paddingTop') + px(stepsBox, 'paddingBottom'); }
+function settled() { root.dispatchEvent(new CustomEvent('yws:layout', { bubbles: true })); }
+/* The one sanctioned height animation: the steps box follows the active step so no step sits over a void. Instant on boot, resize, font load, and whenever motion is off. */
+function settleHeight(instant) {
+gsap.to(stepsBox, { height: boxHeight(state.step), duration: instant ? 0 : D(0.38), ease: 'power3.out', overwrite: 'auto', onComplete: settled });
+}
+function pop(el) {
+if (!el) return;
+gsap.killTweensOf(el, 'scale');
+gsap.timeline().to(el, { scale: 1.04, duration: D(0.12), ease: 'power2.out' }).to(el, { scale: 1, duration: D(0.26), ease: 'back.out(1.6)' });
+}
+function showNext(n, on, instant) {
+var row = nextRows[n - 1]; if (!row) return;
+gsap.to(row, { autoAlpha: on ? 1 : 0, duration: instant ? 0 : D(0.2), overwrite: 'auto' });
+}
+function updateRail(instant) {
+var has = [!!state.service, !!state.town, state.sent];
+segs.forEach(function (seg, i) {
+var on = state.sent || i === state.step - 1 || has[i];
+seg.classList.toggle('is-current', i === state.step - 1 && !state.sent);
+gsap.to(fills[i], { scaleX: on ? 1 : 0, duration: instant ? 0 : D(0.5), ease: 'expo.out', overwrite: 'auto' });
+});
+var text = state.sent ? 'Done' : 'Step ' + state.step + ' of ' + N;
+rail.setAttribute('aria-valuenow', state.sent ? N : state.step);
+rail.setAttribute('aria-valuetext', text);
+counter.textContent = text;
+}
+function revealChip(c) {
+if (!c) return;
+var l = c.offsetLeft, r = l + c.offsetWidth, sl = chipsBox.scrollLeft, w = chipsBox.clientWidth;
+if (l < sl) chipsBox.scrollLeft = l; else if (r > sl + w) chipsBox.scrollLeft = r - w;
+}
+function updateChips(instant) {
+var items = [];
+if (state.service) { var s = radio('service', state.service); items.push({ step: 1, key: 'service:' + state.service, text: s.dataset.chip || s.dataset.label }); }
+if (state.town) items.push({ step: 2, key: 'town:' + state.town, text: townData(state.town).chip });
+chipsEmpty.hidden = items.length > 0;
+var existing = {};
+Array.prototype.slice.call(chipsBox.querySelectorAll('.chip')).forEach(function (c) { existing[c.dataset.key] = c; });
+var fresh = [], current = null;
+items.forEach(function (it) {
+var b = existing[it.key];
+if (b) { delete existing[it.key]; }
+else {
+b = document.createElement('button');
+b.type = 'button'; b.className = 'chip'; b.dataset.goto = it.step; b.dataset.key = it.key;
+b.innerHTML = '<span class="sr" data-chip-sr></span>' + it.text + '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11.5 2.5l2 2L5 13H3v-2z"/></svg>';
+fresh.push(b);
+}
+var cur = it.step === state.step && !state.sent;
+b.classList.toggle('is-current', cur);
+if (cur) { b.setAttribute('aria-current', 'step'); current = current || b; } else { b.removeAttribute('aria-current'); }
+b.querySelector('[data-chip-sr]').textContent = cur ? 'Editing: ' : state.sent ? 'Selected: ' : 'Change: ';
+b.disabled = state.sent;
+chipsBox.appendChild(b);
+});
+Object.keys(existing).forEach(function (k) { existing[k].remove(); });
+if (fresh.length && !instant) gsap.from(fresh, { y: 8, autoAlpha: 0, scale: 0.96, duration: D(0.35), ease: 'back.out(1.6)', stagger: D(0.05), overwrite: 'auto' });
+revealChip(current || fresh[fresh.length - 1]);
+}
+function goTo(n, opts) {
+opts = opts || {};
+n = Math.max(1, Math.min(N, parseInt(n, 10) || 1));
+if (state.sent || sending) return;
+cancelPending();
+if (n === state.step) { if (opts.hint) hint(n, opts.hint); return; }
+var from = state.step, dir = n > from ? 1 : -1;
+var out = steps[from - 1], inn = steps[n - 1];
+state.step = n;
+out.inert = true; out.setAttribute('aria-hidden', 'true');
+inn.inert = false; inn.removeAttribute('aria-hidden');
+steps.forEach(function (s, i) { if (i !== n - 1 && i !== from - 1) gsap.set(s, { autoAlpha: 0 }); });
+showNext(n, !!stepValue(n), true);
+if (stepsBox.getBoundingClientRect().top < 0) root.scrollIntoView({ block: 'start', behavior: motion ? 'smooth' : 'auto' });
+if (moving) moving.kill();
+gsap.killTweensOf(stepsBox, 'height');
+/* The steps share a grid cell, so the incoming step's height is readable while hidden: the glide measures it the instant it starts. */
+moving = gsap.timeline({ onComplete: function () { moving = null; settleHeight(); } });
+hint(n, opts.hint || '');
+updateRail(); updateChips();
+moving.to(out, { x: -24 * dir, autoAlpha: 0, duration: D(0.22), ease: 'power4.out', overwrite: 'auto' }, 0)
+.to(stepsBox, { height: function () { return boxHeight(n); }, duration: D(0.38), ease: 'power3.out', overwrite: 'auto' }, D(0.1))
+.fromTo(inn, { x: 24 * dir, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: D(0.38), ease: 'expo.out', overwrite: 'auto' }, D(0.1));
+announce.textContent = 'Step ' + n + ' of ' + N + '.';
+var focusTarget = opts.focus || inn.querySelector('.q');
+gsap.delayedCall(motion ? 0.14 : 0.05, function () { focusTarget.focus({ preventScroll: true }); });
+}
+function toWho() { goTo(3, { focus: coarse ? null : nameEl }); }
+function advanceFrom(n) {
+if (n === 1) { if (!state.service) { hint(1, 'Pick what the bin is for.'); return; } goTo(2); }
+else if (n === 2) { if (!state.town) { hint(2, 'Pick a town.'); return; } toWho(); }
+}
+function pick(inp, advance) {
+if (state.sent || sending) return;
+hint(state.step, '');
+if (inp.name === 'service') state.service = inp.value;
+else if (inp.name === 'town') state.town = inp.value;
+pop(labelFor(inp));
+updateRail(); updateChips();
+if (!advance) { showNext(state.step, !!stepValue(state.step)); return; }
+/* a town chosen from the service area skips straight to the number */
+if (inp.name === 'service') schedule(D(0.3), function () { if (state.town) toWho(); else goTo(2); });
+else if (inp.name === 'town') schedule(D(0.3), toWho);
+}
+function recapText() { return radio('service', state.service).dataset.label + ', ' + townData(state.town).recap + '.'; }
+function showDone() {
+state.sent = true;
+var top = steps[2].querySelector('.step-top'), back = steps[2].querySelector('[data-back]'), q = steps[2].querySelector('.q');
+gsap.to([fieldsBox, top], { autoAlpha: 0, y: -8, duration: D(0.2), ease: 'power2.in', overwrite: 'auto', onComplete: function () {
+fieldsBox.hidden = true; back.hidden = true; back.disabled = true;
+var first = firstName(state.name);
+q.textContent = first ? 'Got it, ' + first + '.' : 'Got it.';
+var card = tpl.content.firstElementChild.cloneNode(true);
+card.querySelector('[data-recap]').textContent = recapText();
+doneSlot.appendChild(card);
+settleHeight();
+gsap.fromTo(top, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: D(0.5), ease: 'expo.out', overwrite: 'auto' });
+gsap.from(card.querySelectorAll('[data-anim]'), { y: 16, autoAlpha: 0, duration: D(0.5), ease: 'expo.out', stagger: D(0.07), delay: D(0.07) });
+card.focus({ preventScroll: true });
+announce.textContent = 'Got it. A human calls you within the hour, Mon to Fri 8 to 5.';
+updateRail(); updateChips(true);
+} });
+}
+function setBusy(on) {
+sending = on;
+if (on) submitBtn.style.minWidth = submitBtn.offsetWidth + 'px';
+submitBtn.disabled = on;
+if (on) submitBtn.setAttribute('aria-busy', 'true'); else submitBtn.removeAttribute('aria-busy');
+submitBtn.textContent = on ? 'Sending' : submitLabel;
+steps[2].querySelector('[data-back]').disabled = on;
+Array.prototype.slice.call(chipsBox.querySelectorAll('.chip')).forEach(function (c) { c.disabled = on || state.sent; });
+}
+function send(payload) {
+if (SIMULATE) return new Promise(function (res) { setTimeout(res, 500); });
+return new Promise(function (res, rej) {
+var ctrl = window.AbortController ? new AbortController() : null;
+var timer = setTimeout(function () { if (ctrl) ctrl.abort(); rej(new Error('timeout')); }, 8000);
+fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: ctrl ? ctrl.signal : undefined })
+.then(function (r) { clearTimeout(timer); if (r.ok) res(); else rej(new Error('HTTP ' + r.status)); }, function (err) { clearTimeout(timer); rej(err); });
+});
+}
+form.noValidate = true;
+steps.forEach(function (s, i) { if (i) { gsap.set(s, { autoAlpha: 0 }); s.inert = true; s.setAttribute('aria-hidden', 'true'); } });
+['service', 'town'].forEach(function (n) { var c = checkedRadio(n); if (c) state[n] = c.value; });
+state.name = nameEl.value; state.phone = phoneEl.value;
+updateRail(true); updateChips(true);
+steps.forEach(function (s, i) { showNext(i + 1, !!stepValue(i + 1), true); });
+settleHeight(true);
+var resizeTimer = null;
+window.addEventListener('resize', function () {
+if (resizeTimer) resizeTimer.kill();
+resizeTimer = gsap.delayedCall(0.12, function () { resizeTimer = null; if (!moving) settleHeight(true); });
+});
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (!moving) settleHeight(true); });
+form.addEventListener('click', function (e) {
+var lab = e.target.closest('label[for]');
+if (lab) {
+var inp = document.getElementById(lab.htmlFor);
+if (inp && inp.type === 'radio') {
+var adv = lab.hasAttribute('data-advance');
+if (inp.checked) { pick(inp, adv); }
+else if (adv) { advanceIntent = inp.id; setTimeout(function () { if (advanceIntent === inp.id) advanceIntent = null; }, 150); }
+}
+return;
+}
+if (e.target.closest('[data-back]')) { goTo(state.step - 1); return; }
+if (e.target.closest('[data-next]')) { advanceFrom(state.step); return; }
+var chip = e.target.closest('[data-goto]');
+if (chip && !chip.disabled) goTo(chip.dataset.goto);
+});
+form.addEventListener('change', function (e) {
+var t = e.target;
+if (t.type === 'radio') { var adv = advanceIntent === t.id; advanceIntent = null; pick(t, adv); }
+});
+form.addEventListener('input', function (e) {
+if (e.target === nameEl) state.name = e.target.value;
+if (e.target === phoneEl) state.phone = e.target.value;
+if (e.target === nameEl || e.target === phoneEl) e.target.removeAttribute('aria-invalid');
+});
+form.addEventListener('keydown', function (e) {
+var t = e.target;
+if (t.type === 'radio') {
+if (e.key === 'Enter' || e.key === ' ') {
+e.preventDefault();
+if (!t.checked) t.checked = true;
+pick(t, e.key === 'Enter' || labelFor(t).hasAttribute('data-advance'));
+}
+return;
+}
+if (e.key === 'Enter' && t === nameEl) { e.preventDefault(); phoneEl.focus(); }
+});
+form.addEventListener('submit', function (e) {
+e.preventDefault();
+if (state.sent || sending) return;
+if (!state.service) { goTo(1, { hint: 'Pick what the bin is for.' }); return; }
+if (!state.town) { goTo(2, { hint: 'Pick a town.' }); return; }
+state.name = nameEl.value.trim(); state.phone = phoneEl.value.replace(/\D/g, '');
+nameEl.removeAttribute('aria-invalid'); phoneEl.removeAttribute('aria-invalid');
+if (!state.name) { hint(3, 'Enter your name.'); nameEl.setAttribute('aria-invalid', 'true'); nameEl.focus(); return; }
+if (state.phone.length < 10) { hint(3, 'Enter a 10 digit phone.'); phoneEl.setAttribute('aria-invalid', 'true'); phoneEl.focus(); return; }
+hint(3, '');
+setBusy(true);
+var payload = { service: state.service, town: state.town, name: state.name, phone: state.phone };
+send(payload).then(function () { sending = false; showDone(); }, function () {
+setBusy(false);
+hint(3, '', 'Didn’t send. <a href="' + TEL_HREF + '">Call ' + TEL + '</a> or try again.');
+submitBtn.focus({ preventScroll: true });
+});
+});
+mm.add('(hover: hover) and (pointer: fine)', function () {
+var liftIn = function (e) { var lab = e.target.closest('.tile label, .pill label'); if (lab && !lab.contains(e.relatedTarget)) gsap.to(lab, { y: -3, duration: D(0.3), ease: 'back.out(3)', overwrite: 'auto' }); };
+var liftOut = function (e) { var lab = e.target.closest('.tile label, .pill label'); if (lab && !lab.contains(e.relatedTarget)) gsap.to(lab, { y: 0, duration: D(0.35), ease: 'back.out(2)', overwrite: 'auto' }); };
+form.addEventListener('mouseover', liftIn);
+form.addEventListener('mouseout', liftOut);
+return function () { form.removeEventListener('mouseover', liftIn); form.removeEventListener('mouseout', liftOut); };
+});
+function enter() {
+if (!motion || entered) return;
+entered = true;
+var parts = steps[state.step - 1].querySelectorAll('[data-anim]');
+gsap.timeline({ defaults: { ease: 'expo.out' } })
+.from(segs, { scaleX: 0, transformOrigin: '0 50%', duration: 0.6, stagger: 0.06 })
+.from(chipsBox, { y: 8, autoAlpha: 0, duration: 0.4 }, '-=0.4')
+.from(parts, { y: 24, autoAlpha: 0, duration: 0.6, stagger: 0.07, clearProps: 'transform' }, '-=0.35');
+}
+/* Public API: deep links from the service area (towns) and anything else on the page (services) */
+function preselect(value, opts) {
+opts = opts || {};
+if (state.sent || sending) return false;
+var v = String(value || '').trim().toLowerCase(), inp = null;
+var all = form.querySelectorAll('input[name="service"], input[name="town"]');
+for (var i = 0; i < all.length; i++) {
+if (all[i].value === v || (all[i].dataset.label || '').toLowerCase() === v) { inp = all[i]; break; }
+}
+if (!inp) return false;
+inp.checked = true;
+pick(inp, false);
+if (inp.name === 'service') { if (state.town) toWho(); else goTo(2); }
+else { if (state.service) toWho(); else goTo(1); }
+if (opts.scroll !== false) root.scrollIntoView({ behavior: motion ? 'smooth' : 'auto', block: 'start' });
+return true;
+}
+window.YWSFlow = { preselect: preselect, goTo: function (n) { goTo(n); }, enter: enter, el: root, get state() { return Object.assign({}, state); } };
+})();
+/* ---------- Page: hero intro (logo first, then A's word slam, then B's truck), ticker pause, quote, service area, mini bar, reveals ---------- */
+(function () {
+'use strict';
+if (typeof gsap === 'undefined') return;
+var hasST = typeof ScrollTrigger !== 'undefined';
+if (hasST) gsap.registerPlugin(ScrollTrigger);
+document.documentElement.classList.toggle('st', hasST);
+var rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+var motion = !rm.matches;
+var D = function (s) { return motion ? s : 0; };
+if (rm.addEventListener) rm.addEventListener('change', function (e) { motion = !e.matches; });
+var toArr = gsap.utils.toArray;
+var flowEl = document.getElementById('get-a-bin');
+function toFlow() { if (flowEl) flowEl.scrollIntoView({ behavior: motion ? 'smooth' : 'auto', block: 'start' }); }
+function preselect(v) { if (window.YWSFlow && YWSFlow.preselect(v)) return; toFlow(); }
+/* ticker: a pause control for keyboard and touch; the loop rests while the tape is off screen */
+(function () {
+var tape = document.querySelector('.tape'); if (!tape) return;
+var btn = tape.querySelector('.tape-pause');
+if (btn) btn.addEventListener('click', function () { var p = tape.classList.toggle('tape-paused'); btn.setAttribute('aria-pressed', String(p)); btn.textContent = p ? 'Play' : 'Pause'; });
+if ('IntersectionObserver' in window) new IntersectionObserver(function (entries) { entries.forEach(function (e) { e.target.classList.toggle('is-off', !e.isIntersecting); }); }, { rootMargin: '50px' }).observe(tape);
+})();
+/* one rotating quote. PLACEHOLDER REVIEWS: example quotes for layout only. Replace with real, permissioned customer quotes before launch. */
+(function () {
+var box = document.querySelector('[data-quote]'); if (!box) return;
+var qt = box.querySelector('[data-qt]'), qc = box.querySelector('[data-qc]'), dots = toArr('[data-qdot]', box);
+var Q = [
+{ t: 'Booked at 10pm, bin was in the driveway before my coffee.', c: 'Dana, Prescott Valley' },
+{ t: 'The price on the phone was the price on the bill.', c: 'Marcus, Chino Valley' },
+{ t: 'A real person answered and just handled Mom’s cleanout.', c: 'Terri, Dewey' }
+];
+var i = 0, timer = null, hold = false, seen = true;
+function arm() { if (timer) timer.kill(); timer = null; if (!motion || hold || !seen) return; timer = gsap.delayedCall(6, function () { show(i + 1, 1); }); }
+function show(n, dir) {
+n = (n + Q.length) % Q.length; if (n === i) return;
+var d = dir || (n > i ? 1 : -1); i = n;
+dots.forEach(function (b, k) { b.setAttribute('aria-current', k === n ? 'true' : 'false'); });
+gsap.timeline({ defaults: { overwrite: 'auto' } })
+.to([qt, qc], { y: -14 * d, autoAlpha: 0, duration: D(0.22), ease: 'power2.in', stagger: D(0.04) })
+.call(function () { qt.textContent = Q[n].t; qc.textContent = Q[n].c; })
+.fromTo([qt, qc], { y: 18 * d, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: D(0.45), ease: 'expo.out', stagger: D(0.06) });
+arm();
+}
+dots.forEach(function (b, k) { b.addEventListener('click', function () { show(k); }); });
+box.addEventListener('mouseenter', function () { hold = true; arm(); });
+box.addEventListener('mouseleave', function () { hold = false; arm(); });
+box.addEventListener('focusin', function () { hold = true; arm(); });
+box.addEventListener('focusout', function (e) { if (!box.contains(e.relatedTarget)) { hold = false; arm(); } });
+if (hasST) ScrollTrigger.create({ trigger: box, start: 'top bottom', end: 'bottom top', onToggle: function (t) { seen = t.isActive; arm(); } });
+else arm();
+})();
+/* service area: town chips everywhere, B's map pins on wide screens; a tap preselects the town in the callback flow */
+(function () {
+var map = document.querySelector('[data-map]');
+var pins = map ? toArr('.pin', map) : [], chips = toArr('.town');
+var callout = map ? map.querySelector('.callout') : null;
+var coRect = callout && callout.querySelector('rect'), coText = callout && callout.querySelector('text'), coTip = callout && callout.querySelector('path');
+var byTown = {}; pins.forEach(function (p) { byTown[p.dataset.town] = p; });
+if (callout) gsap.set(callout, { autoAlpha: 0 });
+var hotTown = null;
+function place(pin) {
+if (!callout || !pin.getClientRects().length) return;
+var x = +pin.dataset.x, y = +pin.dataset.y;
+coText.textContent = 'Callback in ' + pin.dataset.name;
+var w = Math.ceil(coText.getComputedTextLength()) + 28;
+var cx = gsap.utils.clamp(w / 2 + 6, 594 - w / 2, x);
+coRect.setAttribute('x', -w / 2); coRect.setAttribute('width', w);
+coTip.setAttribute('transform', 'translate(' + (x - cx) + ' 0)');
+gsap.to(callout, { x: cx, y: y, autoAlpha: 1, duration: D(0.35), ease: 'back.out(1.6)', overwrite: 'auto' });
+}
+function hot(town) {
+if (town === hotTown) return; hotTown = town;
+pins.forEach(function (p) {
+var on = p.dataset.town === town; p.classList.toggle('is-hot', on);
+gsap.to(p.querySelector('.dot'), { scale: on ? 1.45 : 1, duration: D(0.4), ease: on ? 'back.out(2.5)' : 'power2.out', transformOrigin: '50% 50%', overwrite: 'auto' });
+});
+chips.forEach(function (c) {
+var on = c.dataset.town === town; c.classList.toggle('is-hot', on);
+gsap.to(c, { scale: on ? 1.06 : 1, y: on ? -2 : 0, duration: D(0.35), ease: on ? 'back.out(2.5)' : 'power2.out', overwrite: 'auto' });
+});
+if (town && byTown[town]) place(byTown[town]);
+else if (callout) gsap.to(callout, { autoAlpha: 0, duration: D(0.2), overwrite: 'auto' });
+}
+function bind(el, isPin) {
+el.addEventListener('mouseenter', function () { hot(el.dataset.town); });
+el.addEventListener('mouseleave', function () { hot(null); });
+el.addEventListener('focus', function () { hot(el.dataset.town); });
+el.addEventListener('blur', function () { hot(null); });
+el.addEventListener('click', function () { preselect(el.dataset.town); hot(null); });
+if (isPin) el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); preselect(el.dataset.town); } });
+}
+pins.forEach(function (p) { bind(p, true); });
+chips.forEach(function (c) { bind(c, false); });
+})();
+/* sticky mini bar, narrow screens only (the sticky nav carries phone and Book Online from 900px up): in once the hero scrolls away, out when it comes back */
+(function () {
+var mini = document.querySelector('[data-mini]'), hero = document.querySelector('.hero'); if (!mini || !hasST || !hero) return;
+gsap.matchMedia().add('(max-width: 899px)', function () {
+gsap.set(mini, { yPercent: 140, autoAlpha: 0 });
+var on = false;
+function set(v) { if (v === on) return; on = v; gsap.to(mini, { yPercent: v ? 0 : 140, autoAlpha: v ? 1 : 0, duration: D(v ? 0.5 : 0.3), ease: v ? 'back.out(1.5)' : 'power2.in', overwrite: true }); }
+ScrollTrigger.create({ trigger: hero, start: 'bottom 80px', end: 'max', onToggle: function (t) { set(t.isActive); } });
+});
+})();
+var mm = gsap.matchMedia();
+mm.add('(prefers-reduced-motion: no-preference)', function () {
+/* hero intro: the logo settles first, the words slam up with overshoot, the line and the buttons follow, and the truck is already rolling in as they land */
+gsap.set('.hero-logo', { autoAlpha: 0, y: 12 });
+gsap.set('.hero-h .word', { yPercent: 115, autoAlpha: 1 });
+gsap.set(['.hero-sub', '.hero-ctas'], { autoAlpha: 0, y: 20 });
+var stageSvg = document.querySelector('.stage-svg');
+/* parked just past the viewport's left edge in SVG units; re-measured when the story starts so a late layout shift cannot show the nose */
+function rigStart() { var b = stageSvg.getBoundingClientRect(), u = b.width / 1000 || 1; return -(1000 + b.left / u + 60); }
+var travel = Math.abs(rigStart()), dur = gsap.utils.clamp(1.5, 2.2, travel / 1100);
+gsap.set('.rig', { x: rigStart(), autoAlpha: 1 });
+gsap.set('.bed', { transformOrigin: '0% 100%' });
+gsap.set('.bin', { x: 350, y: -114, transformOrigin: '0% 100%' });
+gsap.set('.lid', { rotation: -120, transformOrigin: '0% 100%' });
+gsap.set('.decal', { opacity: 0 });
+var story = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+story.fromTo('.rig', { x: rigStart }, { x: 0, duration: dur }, 0)
+.to('.stage-svg .wheel', { rotation: 360 * Math.max(4, Math.round(travel / 200)), duration: dur, transformOrigin: '50% 50%' }, 0)
+/* the truck is stationary before the bed lifts; the bin slides, lands with one thud (the rig dips on impact), then a small settle: steel, not rubber */
+.to('.bed', { rotation: -14, duration: 0.55, ease: 'power2.inOut' }, '>0.1')
+.to('.bin', { x: 190, y: -64, rotation: -9, duration: 0.45, ease: 'power1.in' }, '<0.2')
+.to('.bin', { x: 0, y: 0, rotation: 0, duration: 0.42, ease: 'power3.in' })
+.to('.rig', { y: 2, duration: 0.08, yoyo: true, repeat: 1, ease: 'power1.inOut' }, '>-0.02')
+.to('.bin', { y: -5, duration: 0.1, ease: 'power1.out' }, '<0.02')
+.to('.bin', { y: 0, duration: 0.16, ease: 'power2.in' })
+.to('.bed', { rotation: 0, duration: 0.5, ease: 'power2.inOut' }, '<0.15')
+.to('.lid', { rotation: 0, duration: 0.7, ease: 'back.out(1.2)' }, '-=0.2')
+.to('.decal', { opacity: 1, duration: 0.55, ease: 'power2.out' }, '-=0.3');
+var intro = gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } });
+intro.to('.hero-logo', { autoAlpha: 1, y: 0, duration: 0.9 }, 0.05)
+.to('.hero-h .word', { yPercent: 0, duration: 0.7, ease: 'back.out(1.4)', stagger: 0.1 }, 0.3)
+.to('.hero-sub', { autoAlpha: 1, y: 0, duration: 0.55 }, 0.85)
+.to('.hero-ctas', { autoAlpha: 1, y: 0, duration: 0.55, ease: 'back.out(1.2)' }, 1.0)
+.call(function () { story.invalidate().play(); }, null, 0.55);
+var fontReady = (document.fonts && document.fonts.load) ? Promise.race([document.fonts.load('1em Anton'), new Promise(function (r) { setTimeout(r, 350); })]) : Promise.resolve();
+fontReady.then(function () { intro.play(); });
+/* ambient: clouds drift while the hero is on screen; the scene parallaxes on scroll */
+var drift = [
+gsap.to('.c1', { x: 36, duration: 34, yoyo: true, repeat: -1, ease: 'sine.inOut', paused: true }),
+gsap.to('.c2', { x: -30, duration: 26, yoyo: true, repeat: -1, ease: 'sine.inOut', paused: true })
+];
+if (hasST) {
+ScrollTrigger.create({ trigger: '.hero', start: 'top bottom', end: 'bottom top', onToggle: function (t) { drift.forEach(function (d) { d.paused(!t.isActive); }); } });
+gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 } })
+.to('.mtn-far', { yPercent: 22, ease: 'none' }, 0)
+.to('.mtn-near', { yPercent: 10, ease: 'none' }, 0)
+.to('.sun', { y: 90, ease: 'none' }, 0)
+.to('.hawk', { x: -120, y: 40, ease: 'none' }, 0);
+} else { drift.forEach(function (d) { d.play(); }); }
+/* section reveals: once, on entry; a keyboard focus inside a section that has not entered yet completes it at once */
+function reveal(el, tl) {
+if (!el) return;
+el.addEventListener('focusin', function () { if (tl.progress() < 1) tl.progress(1); }, { once: true });
+if (hasST) ScrollTrigger.create({ trigger: el, start: 'top 82%', once: true, onEnter: function () { tl.play(); } }); else tl.play();
+}
+var sizes = document.getElementById('sizes');
+reveal(sizes, gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } })
+.fromTo(sizes.querySelectorAll('.sz-copy > *'), { y: 22, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.08, clearProps: 'transform' })
+.fromTo(sizes.querySelector('.scene-card'), { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, clearProps: 'transform' }, '-=0.5'));
+var svc = document.getElementById('services');
+reveal(svc, gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } })
+.fromTo(svc.querySelectorAll('.sec-head > *'), { y: 22, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.08, clearProps: 'transform' })
+.fromTo(svc.querySelectorAll('.svc'), { y: 36, autoAlpha: 0, scale: 0.96 }, { y: 0, autoAlpha: 1, scale: 1, duration: 0.7, stagger: 0.1, ease: 'back.out(1.3)', clearProps: 'transform' }, '-=0.35'));
+var trust = document.getElementById('trust');
+reveal(trust, gsap.timeline({ paused: true })
+.fromTo(trust.querySelectorAll('.patch svg'), { scale: 0.5, rotation: -14, autoAlpha: 0 }, { scale: 1, rotation: 0, autoAlpha: 1, duration: 0.8, stagger: 0.12, ease: 'back.out(1.8)', transformOrigin: '50% 50%' })
+.fromTo(trust.querySelectorAll('.patch b'), { y: 12, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, stagger: 0.12, ease: 'expo.out' }, '-=0.6'));
+var quote = document.getElementById('quote');
+reveal(quote, gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } })
+.fromTo(quote.querySelectorAll('.kicker, blockquote, .qcite, .qdots'), { y: 24, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.09, clearProps: 'transform' }));
+var area = document.getElementById('area');
+reveal(area, gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } })
+.fromTo(area.querySelectorAll('.sec-head > *'), { y: 22, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.08, clearProps: 'transform' })
+.fromTo(area.querySelectorAll('.town'), { y: 14, scale: 0.9, autoAlpha: 0 }, { y: 0, scale: 1, autoAlpha: 1, duration: 0.5, stagger: 0.04, ease: 'back.out(2)', clearProps: 'transform' }, '-=0.3')
+.fromTo(area.querySelector('.area-note'), { y: 12, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, clearProps: 'transform' }, '-=0.3')
+.fromTo(area.querySelector('.area-map'), { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, clearProps: 'transform' }, '-=0.7')
+.fromTo(area.querySelectorAll('.pin .dot'), { scale: 0 }, { scale: 1, duration: 0.5, stagger: 0.06, ease: 'back.out(2.5)', transformOrigin: '50% 50%' }, '-=0.5'));
+var cb = document.getElementById('callback');
+reveal(cb, gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } })
+.fromTo(cb.querySelectorAll('.cb-copy > *'), { y: 22, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.08, clearProps: 'transform' })
+.fromTo(cb.querySelector('.flow'), { y: 40, autoAlpha: 0, scale: 0.985 }, { y: 0, autoAlpha: 1, scale: 1, duration: 0.8, clearProps: 'transform' }, '-=0.45')
+.call(function () { if (window.YWSFlow) YWSFlow.enter(); }, null, '-=0.55'));
+return function () { intro.kill(); story.kill(); drift.forEach(function (d) { d.kill(); }); };
+});
+if (hasST) {
+window.addEventListener('load', function () { ScrollTrigger.refresh(); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { ScrollTrigger.refresh(); });
+document.addEventListener('yws:layout', function () { ScrollTrigger.refresh(); });
+}
+})();
+</script>
+<script>
+/* ---------- TrashLab Book Online modal (reference component, mockups/components/trashlab-booknow.html) ----------
+data-trashlab="book" links open the shop in the modal (without JS they open it in a new tab). data-trashlab="portal" stays a plain new-tab link to the customer portal.
+GSAP drives the entrance and exit; reduced motion or a missing GSAP shows and hides instantly. Only transform and opacity animate.
+window.TrashLabBook = { open(trigger), close(), isOpen, refresh(), SHOP_URL, PORTAL_URL }; document events trashlab:open and trashlab:close. */
+(function () {
+'use strict';
+var SHOP = 'https://app.trashlab.com/shop-v3/0170d657-56c3-45a0-98c8-00f9dd3d113d';
+var PORTAL = 'https://app.trashlab.com/customer-portal/login?orgId=0170d657-56c3-45a0-98c8-00f9dd3d113d';
+var root = document.getElementById('trashlab-book');
+if (!root) return;
+var overlay = root.querySelector('.tlb-overlay');
+var dialog = root.querySelector('.tlb-dialog');
+var closeBtn = root.querySelector('.tlb-close');
+var newTab = root.querySelector('.tlb-newtab');
+var body = root.querySelector('.tlb-body');
+var frame = root.querySelector('.tlb-frame');
+var sStart = root.querySelector('[data-tlb-sentinel="start"]');
+var sEnd = root.querySelector('[data-tlb-sentinel="end"]');
+var g = window.gsap || null;
+var rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+function animate() { return !!g && !rm.matches; }
+var isOpen = false, opener = null, tl = null, framed = false, loadTimer = 0, isolated = [], scrollPrev = null, downOnOverlay = false;
+function emit(name) { try { document.dispatchEvent(new CustomEvent(name)); } catch (e) {} }
+function focusEl(el) { if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
+/* iframe: src on the first open only, kept across closes. The loading layer lifts on load (15 s safety net). */
+function loadFrame() {
+if (framed) return;
+framed = true;
+frame.addEventListener('load', frameReady);
+loadTimer = setTimeout(frameReady, 15000);
+frame.src = frame.getAttribute('data-src') || SHOP;
+}
+function frameReady() { clearTimeout(loadTimer); body.classList.add('is-loaded'); }
+/* everything outside the modal: aria-hidden, plus inert where the browser supports it */
+function isolate(on) {
+if (on) {
+isolated = [];
+Array.prototype.forEach.call(document.body.children, function (el) {
+if (el === root || /^(SCRIPT|STYLE|LINK|TITLE|META)$/.test(el.tagName)) return;
+isolated.push({ el: el, aria: el.getAttribute('aria-hidden'), inert: el.inert === true });
+el.setAttribute('aria-hidden', 'true');
+if ('inert' in el) el.inert = true;
+});
+} else {
+isolated.forEach(function (r) {
+if (r.aria === null) r.el.removeAttribute('aria-hidden'); else r.el.setAttribute('aria-hidden', r.aria);
+if ('inert' in r.el) r.el.inert = r.inert;
+});
+isolated = [];
+}
+}
+/* scroll lock that keeps the scrollbar gutter so the page does not shift; the fixed mini bar reads --tlb-gutter */
+function lock() {
+if (scrollPrev) return;
+var de = document.documentElement, b = document.body;
+var sw = window.innerWidth - de.clientWidth;
+scrollPrev = { de: de.style.overflow, pad: b.style.paddingRight, gutter: de.style.getPropertyValue('--tlb-gutter') };
+if (sw > 0) {
+b.style.paddingRight = ((parseFloat(getComputedStyle(b).paddingRight) || 0) + sw) + 'px';
+de.style.setProperty('--tlb-gutter', sw + 'px');
+}
+de.style.overflow = 'hidden';
+}
+function unlock() {
+if (!scrollPrev) return;
+var de = document.documentElement, b = document.body;
+de.style.overflow = scrollPrev.de;
+b.style.paddingRight = scrollPrev.pad;
+if (scrollPrev.gutter) de.style.setProperty('--tlb-gutter', scrollPrev.gutter); else de.style.removeProperty('--tlb-gutter');
+scrollPrev = null;
+}
+var FOCUSABLE = 'a[href], button:not([disabled]), iframe, input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+function focusables() {
+return Array.prototype.filter.call(dialog.querySelectorAll(FOCUSABLE), function (el) {
+return !el.hasAttribute('data-tlb-sentinel') && el.getClientRects().length > 0;
+});
+}
+function openModal(trigger) {
+if (isOpen) return;
+isOpen = true;
+opener = (trigger && typeof trigger.focus === 'function') ? trigger : document.activeElement;
+if (tl) { tl.kill(); tl = null; }
+var fromHidden = root.hidden;
+root.hidden = false;
+lock();
+isolate(true);
+loadFrame();
+if (animate()) {
+tl = g.timeline({ onComplete: function () { tl = null; } });
+if (fromHidden) {
+/* the dialog fades on opacity (not autoAlpha) so the Close button can take focus on the same tick */
+tl.fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.22, ease: 'power2.out' }, 0)
+.fromTo(dialog, { y: 12, scale: 0.97, opacity: 0, visibility: 'inherit' }, { y: 0, scale: 1, opacity: 1, duration: 0.3, ease: 'power3.out' }, 0.04);
+} else {
+g.set(dialog, { visibility: 'inherit' });
+tl.to(overlay, { autoAlpha: 1, duration: 0.22, ease: 'power2.out' }, 0)
+.to(dialog, { y: 0, scale: 1, opacity: 1, duration: 0.3, ease: 'power3.out' }, 0);
+}
+} else if (g) {
+g.set(overlay, { autoAlpha: 1 });
+g.set(dialog, { y: 0, scale: 1, autoAlpha: 1 });
+}
+focusEl(closeBtn);
+emit('trashlab:open');
+}
+function closeModal() {
+if (!isOpen) return;
+isOpen = false;
+if (tl) { tl.kill(); tl = null; }
+isolate(false);
+var back = opener;
+opener = null;
+if (back && back !== document.body && document.body.contains(back)) focusEl(back);
+function done() { tl = null; root.hidden = true; unlock(); emit('trashlab:close'); }
+if (animate()) {
+tl = g.timeline({ onComplete: done });
+tl.to(dialog, { y: 12, scale: 0.97, autoAlpha: 0, duration: 0.18, ease: 'power2.in' }, 0)
+.to(overlay, { autoAlpha: 0, duration: 0.18, ease: 'power2.in' }, 0.02);
+} else {
+if (g) g.set([overlay, dialog], { autoAlpha: 0 });
+done();
+}
+}
+/* keyboard: Escape closes, Tab wraps inside the dialog */
+document.addEventListener('keydown', function (e) {
+if (!isOpen) return;
+if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); closeModal(); return; }
+if (e.key !== 'Tab') return;
+var list = focusables();
+if (!list.length) { e.preventDefault(); focusEl(closeBtn); return; }
+var first = list[0], last = list[list.length - 1], active = document.activeElement;
+var inside = !!active && active !== dialog && dialog.contains(active);
+if (e.shiftKey) { if (!inside || active === first) { e.preventDefault(); focusEl(last); } }
+else if (!inside || active === last) { e.preventDefault(); focusEl(first); }
+});
+/* sentinels catch focus leaving the cross-origin iframe, where keydown never reaches this document */
+sStart.addEventListener('focus', function (e) {
+var list = focusables();
+if (!list.length) { focusEl(closeBtn); return; }
+var from = e.relatedTarget, inside = !!from && from !== dialog && dialog.contains(from);
+focusEl(inside ? list[list.length - 1] : list[0]);
+});
+sEnd.addEventListener('focus', function () { var list = focusables(); focusEl(list[0] || closeBtn); });
+/* pointer: overlay click closes only when the press also started on the overlay (no close on a drag out of the frame) */
+root.addEventListener('pointerdown', function (e) { downOnOverlay = (e.target === overlay); });
+overlay.addEventListener('click', function () { if (downOnOverlay) closeModal(); downOnOverlay = false; });
+closeBtn.addEventListener('click', closeModal);
+newTab.addEventListener('click', function () { closeModal(); });
+/* triggers: data-trashlab="book" opens the modal, data-trashlab="portal" stays a plain new-tab link */
+function upgradeTriggers() {
+Array.prototype.forEach.call(document.querySelectorAll('[data-trashlab="book"]'), function (el) {
+if (el.tagName === 'A') {
+var href = el.getAttribute('href');
+if (!href || href.charAt(0) === '#') el.setAttribute('href', SHOP);
+el.setAttribute('target', '_blank');
+el.setAttribute('rel', 'noopener');
+}
+el.setAttribute('aria-haspopup', 'dialog');
+});
+Array.prototype.forEach.call(document.querySelectorAll('[data-trashlab="portal"]'), function (el) {
+if (el.tagName !== 'A') return;
+var href = el.getAttribute('href');
+if (!href || href.charAt(0) === '#') el.setAttribute('href', PORTAL);
+el.setAttribute('target', '_blank');
+el.setAttribute('rel', 'noopener');
+});
+}
+upgradeTriggers();
+document.addEventListener('click', function (e) {
+var t = (e.target && e.target.closest) ? e.target.closest('[data-trashlab="book"]') : null;
+if (!t || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+e.preventDefault();
+openModal(t);
+});
+window.TrashLabBook = {
+open: function (trigger) { openModal(trigger); },
+close: closeModal,
+get isOpen() { return isOpen; },
+refresh: upgradeTriggers,
+SHOP_URL: SHOP,
+PORTAL_URL: PORTAL
+};
+})();
+</script>
